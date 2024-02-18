@@ -37,9 +37,7 @@
 #define SCREEN_ADDRESS 0x3C ///< See datasheet for Address; 0x3D for 128x64, 0x3C for 128x32
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
-#define NUMFLAKES     10 // Number of snowflakes in the animation example
 
-// Logo de démarrage
 #define LOGO_HEIGHT   32
 #define LOGO_WIDTH    128
 
@@ -60,11 +58,11 @@ void setup() {
     for(;;); // Don't proceed, loop forever
   }
 
+  // Logo display
+  displayStartupLogo();    
 
-  startupLogo();    // Draw a small bitmap image
 
-
-
+  // Initialisations pour test
   colonDisplayed=true;
   hour = 21;
   minute = 35;
@@ -96,6 +94,9 @@ void loop()
 }
 
 
+/*
+  Display time from string ('hh:mm' or 'hh mm') using text functionality
+*/
 void displayTimeStr(String timeStr)
 {
   for(int i=0; i < timeStr.length(); i++)
@@ -104,37 +105,37 @@ void displayTimeStr(String timeStr)
   }
 }
 
+
+/*
+  Display time from string ('hh:mm' or 'hh mm') using bitmaps
+*/
 void displayTimeImg(String timeStr)
 {
-  int xOffset = 0;
-  int curOffset;
+  int nextCharOffset = 0;  // offset for next character to draw
+  int curOffset; // x Offset to draw bitmaps
+  char curChar; // current character to draw
   
+  // Looping through characters composing time to display
   for(int i=0; i < timeStr.length(); i++)
   {
-    curOffset = xOffset;
+    curChar = timeStr[i];
+    curOffset = nextCharOffset;
     
-    xOffset += (timeStr[i] == ':' || timeStr[i]==' ')? COLON_WIDTH : DIGIT_WIDTH;
-    
-    switch(timeStr[i])
+    // If we have to display char between hours and minutes
+    if(curChar == ':' || curChar==' ')
     {
-      case ':'  : { display.drawBitmap(curOffset, 0, digit_colon, COLON_WIDTH, SCREEN_HEIGHT, 1);     break; }
-      case ' '  : { display.drawBitmap(curOffset, 0, digit_no_colon, COLON_WIDTH, SCREEN_HEIGHT, 1);  break; }
-      case '1'  : { display.drawBitmap(curOffset, 0, digit_1, DIGIT_WIDTH, SCREEN_HEIGHT, 1);         break; }
-      case '2'  : { display.drawBitmap(curOffset, 0, digit_2, DIGIT_WIDTH, SCREEN_HEIGHT, 1);         break; }
-      case '3'  : { display.drawBitmap(curOffset, 0, digit_3, DIGIT_WIDTH, SCREEN_HEIGHT, 1);         break; }
-      case '4'  : { display.drawBitmap(curOffset, 0, digit_4, DIGIT_WIDTH, SCREEN_HEIGHT, 1);         break; }
-      case '5'  : { display.drawBitmap(curOffset, 0, digit_5, DIGIT_WIDTH, SCREEN_HEIGHT, 1);         break; }
-      case '6'  : { display.drawBitmap(curOffset, 0, digit_6, DIGIT_WIDTH, SCREEN_HEIGHT, 1);         break; }
-      case '7'  : { display.drawBitmap(curOffset, 0, digit_7, DIGIT_WIDTH, SCREEN_HEIGHT, 1);         break; }
-      case '8'  : { display.drawBitmap(curOffset, 0, digit_8, DIGIT_WIDTH, SCREEN_HEIGHT, 1);         break; }
-      case '9'  : { display.drawBitmap(curOffset, 0, digit_9, DIGIT_WIDTH, SCREEN_HEIGHT, 1);         break; }
-      case '0'  : { display.drawBitmap(curOffset, 0, digit_0, DIGIT_WIDTH, SCREEN_HEIGHT, 1);         break; }
-
+      nextCharOffset += COLON_WIDTH;
+      display.drawBitmap(curOffset, 0, avengerColonOrNot[(curChar==' ')?0:1], COLON_WIDTH, SCREEN_HEIGHT, 1);
     }
-
-    //display.drawBitmap(curOffset, 0, bitmap, bitmapWidth, SCREEN_HEIGHT, 1);
+    else // we have to display a digit
+    {
+      nextCharOffset += DIGIT_WIDTH;
+      // Displaying digit by pointing on it in 'all digits bitmap array' by it index (corresponding to the number we have to display. number 0 => index 0 in array)
+      display.drawBitmap(curOffset, 0, allAvengerDigits[String(timeStr[i]).toInt()], DIGIT_WIDTH, SCREEN_HEIGHT, 1);
+    }
   }
 }
+
 
 void displayTime()
 {
@@ -151,7 +152,7 @@ void displayTime()
   if(minute<10) timeStr +="0";
   timeStr += String(minute);
 
-  // Affichage des digits
+  // Displaying time
   //displayTimeStr(timeStr);
   displayTimeImg(timeStr);
 
@@ -164,8 +165,10 @@ void displayTime()
   Serial.println(second);
 }
 
-
-void startupLogo(void) {
+/*
+  Displays startup logo
+*/
+void displayStartupLogo() {
   display.clearDisplay();
 
   display.drawBitmap(
