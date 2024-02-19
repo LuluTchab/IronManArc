@@ -27,11 +27,13 @@
 #include "NTPClient.h"
 #include "WiFiManager.h"
 
+// Wifi Configuration
+#include "wifiConfig.h"
+
 //========================USEFUL VARIABLES=============================
 int UTC = 1; // UTC = value in hour (SUMMER TIME) [For example: Paris UTC+2 => UTC=2]
 
-const char *ssid     = ""; 
-const char *password = "";
+
 
 
 const long utcOffsetInSeconds = 3600; // UTC + 1H / Offset in second
@@ -69,12 +71,14 @@ bool colonDisplayed;
 void setup() {
   Serial.begin(115200);
   Serial.println("\n Starting");
+  
   WiFi.begin(ssid, password);
 
   while ( WiFi.status() != WL_CONNECTED ) {
     delay ( 500 );
     Serial.print ( "." );
   }
+  Serial.println("\nConnected!");
 
   timeClient.begin();
 
@@ -102,6 +106,24 @@ void loop()
   
 }
 
+// Prints Wifi networks
+void printWifiNetworks()
+{
+  int numSsid = WiFi.scanNetworks();
+  
+  String ssid;
+  uint8_t encryptionType;
+  int32_t RSSI;
+  uint8_t* BSSID;
+  int32_t channel;
+
+  Serial.printf("%d network(s) found\n", numSsid);
+  for (int i = 0; i < numSsid; i++)
+  {
+    WiFi.getNetworkInfo(i, ssid, encryptionType, RSSI, BSSID, channel);
+    Serial.printf("%d: %s, Ch:%d (%ddBm)\n", i + 1, ssid.c_str(), channel, RSSI);
+  }
+}
 
 /*
   Display time from string ('hh:mm' or 'hh mm') using text functionality
