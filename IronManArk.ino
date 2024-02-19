@@ -24,6 +24,23 @@
 #include <Adafruit_SSD1306.h>
 #include "StartupLogo.h"
 #include "AvengersDigits.h"
+#include "NTPClient.h"
+#include "WiFiManager.h"
+
+//========================USEFUL VARIABLES=============================
+int UTC = 1; // UTC = value in hour (SUMMER TIME) [For example: Paris UTC+2 => UTC=2]
+
+const char *ssid     = ""; 
+const char *password = "";
+
+
+const long utcOffsetInSeconds = 3600; // UTC + 1H / Offset in second
+
+// Define NTP Client to get time
+WiFiUDP ntpUDP;
+NTPClient timeClient(ntpUDP, "pool.ntp.org", utcOffsetInSeconds*UTC);
+
+// ==============================================================================
 
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 32 // OLED display height, in pixels
@@ -45,12 +62,21 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 #define DIGIT_WIDTH 29
 #define COLON_WIDTH 12
 
-int hour, minute, second;
+int hours, minutes, seconds, previousSeconds;
 bool colonDisplayed;
 
 
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(115200);
+  Serial.println("\n Starting");
+  WiFi.begin(ssid, password);
+
+  while ( WiFi.status() != WL_CONNECTED ) {
+    delay ( 500 );
+    Serial.print ( "." );
+  }
+
+  timeClient.begin();
 
   // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
   if(!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) {
@@ -62,35 +88,18 @@ void setup() {
   displayStartupLogo();    
 
 
-  // Initialisations pour test
+  // Init
   colonDisplayed=true;
-  hour = 21;
-  minute = 35;
-  second = 45;
 
 }
 
 void loop() 
 {
-  displayTime();
-  delay(1000);
+  // Update the time
+  timeClient.update();
+  updateClock();
+  delay(200);
   
-  second++;
-  if(second==60)
-  {
-    second=0;
-    minute++;
-    if(minute==60)
-    {
-      minute=0;
-      hour++;
-      if(hour==24)
-      {
-        hour=0;
-      }
-    }
-  }
-  colonDisplayed=!colonDisplayed;
 }
 
 
@@ -137,32 +146,36 @@ void displayTimeImg(String timeStr)
 }
 
 
-void displayTime()
+void updateClock()
 {
-  display.clearDisplay(); // Clear display buffer
-  display.setTextSize(4); // Draw 2X-scale text
-  display.setTextColor(SSD1306_WHITE);
-  display.setCursor(0, 0);
-  
+  hours = timeClient.getHours();
+  minutes = timeClient.getMinutes();
+  seconds = timeClient.getSeconds();
+
+  // For colon anim between hours and minutes
+  if(seconds != previousSeconds)
+  {
+    previousSeconds = seconds;
+    colonDisplayed =! colonDisplayed;
+  }
+
   String timeStr = "";
-  if(hour<10) timeStr +="0";
-  timeStr += String(hour);
+  if(hours<10) timeStr +="0";
+  timeStr += String(hours);
   timeStr += (colonDisplayed)?":":" ";
   // Minutes
-  if(minute<10) timeStr +="0";
-  timeStr += String(minute);
+  if(minutes<10) timeStr +="0";
+  timeStr += String(minutes);
 
   // Displaying time
   //displayTimeStr(timeStr);
+
+  display.clearDisplay();
   displayTimeImg(timeStr);
 
 
   display.display();      // Show initial text
 
-  // -- Serial
-  Serial.print(timeStr);
-  Serial.print(" ");
-  Serial.println(second);
 }
 
 /*
