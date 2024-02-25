@@ -29,6 +29,7 @@
 
 // Wifi Configuration
 #include "wifiConfig.h"
+#include "ArkConfigMenu.h"
 
 //========================USEFUL VARIABLES=============================
 int UTC = 1; // UTC = value in hour (SUMMER TIME) [For example: Paris UTC+2 => UTC=2]
@@ -67,20 +68,14 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 int hours, minutes, seconds, previousSeconds;
 bool colonDisplayed;
 
+// Configuration menu
+ArkConfigMenu configMenu;
 
-void setup() {
+void setup() 
+{
   Serial.begin(115200);
-  Serial.println("\n Starting");
   
-  WiFi.begin(ssid, password);
-
-  while ( WiFi.status() != WL_CONNECTED ) {
-    delay ( 500 );
-    Serial.print ( "." );
-  }
-  Serial.println("\nConnected!");
-
-  timeClient.begin();
+  configMenu.begin();
 
   // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
   if(!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) {
@@ -91,24 +86,72 @@ void setup() {
   // Logo display
   displayStartupLogo();    
 
+  // If configuration is not valid
+  if(!configMenu.isConfigFormatValid())
+  {
+    displayTextOnOLED("Invalid config\nUse Serial port");
+  }
+  else // Configuration is valid
+  {
+    
+    WiFi.begin(configMenu.getWifiSSID(), configMenu.getWifiPassword());
+    int nbMsLeftToTry = 3000;
+    const int nbMsBetweenChecks = 500;
+
+    // We try to connect for a nbMsLeftToTry milliseconds
+    while((WiFi.status() != WL_CONNECTED) && (nbMsLeftToTry<0))
+    {
+      delay(nbMsBetweenChecks);
+      nbMsLeftToTry -= nbMsBetweenChecks;
+    }
+    
+    // If we were able to connect on Wifi
+    if(WiFi.status() == WL_CONNECTED)
+    {
+      timeClient.begin();
+    }
+    else
+    {
+      displayTextOnOLED("Cannot connect on Wifi\nUse Serial port");
+    }
+  }
 
   // Init
-  colonDisplayed=true;
-
+  colonDisplayed = true;
 }
 
 void loop() 
 {
-  // Update the time
-  timeClient.update();
-  updateClock();
-  delay(200);
+
+  short actionToDo = configMenu.handleInput();
+
+  // If it has been requested to print wifi networks
+  if(actionToDo == SUB_MENU__WIFI_CONFIG__LIST_NETWORKS)
+  {
+    printWifiNetworks();
+  }
+
+  // If wifi is connected
+  if(WiFi.status() == WL_CONNECTED)
+  {
+    // Update the time
+    timeClient.update();
+    
+    hours = timeClient.getHours();
+    minutes = timeClient.getMinutes();
+    seconds = timeClient.getSeconds();
+
+    updateClockDisplay();
+    delay(200);
+  }
+
   
 }
 
 // Prints Wifi networks
 void printWifiNetworks()
 {
+  Serial.println("Scanning networks...");
   int numSsid = WiFi.scanNetworks();
   
   String ssid;
@@ -121,8 +164,9 @@ void printWifiNetworks()
   for (int i = 0; i < numSsid; i++)
   {
     WiFi.getNetworkInfo(i, ssid, encryptionType, RSSI, BSSID, channel);
-    Serial.printf("%d: %s, Ch:%d (%ddBm)\n", i + 1, ssid.c_str(), channel, RSSI);
+    Serial.printf("%d: %s - Channel:%d (%ddBm)\n", i + 1, ssid.c_str(), channel, RSSI);
   }
+  Serial.println("");
 }
 
 /*
@@ -168,11 +212,9 @@ void displayTimeImg(String timeStr)
 }
 
 
-void updateClock()
+void updateClockDisplay()
 {
-  hours = timeClient.getHours();
-  minutes = timeClient.getMinutes();
-  seconds = timeClient.getSeconds();
+  
 
   // For colon anim between hours and minutes
   if(seconds != previousSeconds)
@@ -212,5 +254,22 @@ void displayStartupLogo() {
     starkIndustriesLogo, LOGO_WIDTH, LOGO_HEIGHT, 1);
   display.display();
   delay(2000);
+}
+
+
+/*
+  Displays given text on OLED screen
+*/
+void displayTextOnOLED(String text)
+{
+  display.clearDisplay();
+  display.setTextSize(1);      // Normal 1:1 pixel scale
+  display.setTextColor(SSD1306_WHITE); // Draw white text
+  display.setCursor(0, 0);     // Start at top-left corner
+  for(int i=0; i < text.length(); i++)
+  {
+    display.write(char(text[i]));
+  }
+  display.display();      // Show initial text
 }
 
