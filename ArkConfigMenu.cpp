@@ -97,7 +97,7 @@ short ArkConfigMenu::handleInput()
           else if(_currentSubMenuIndex==INT_UNINITIALIZED)
           {
             // If we are in range, we select menu
-            if(requestedMenuIndex < SUB_MENU_SIZE)
+            if(requestedMenuIndex < getCurrentSubMenuSize())
             {
               // If we asked for 'Back'
               if(requestedMenuIndex == SUB_MENU__BACK)
@@ -181,11 +181,9 @@ short ArkConfigMenu::convertCharToInt(char c)
 
 // ------------------------------------------------------------
 // Converts String into char*
-char* ArkConfigMenu::convertStringToCharArray(String text)
+void ArkConfigMenu::convertStringToCharArray(String text, char* output)
 {
-  char result[text.length()+1];
-  text.toCharArray(result, text.length());
-  return result;
+  text.toCharArray(output, text.length()+1);
 }
 
 
@@ -210,7 +208,7 @@ void ArkConfigMenu::printCurrentMenu()
     Serial.println("");
     // First we display root menu name
     Serial.print("= "); Serial.print(_menu[_currentMenuIndex]); Serial.println(" =");
-    for(short i=0; i<SUB_MENU_SIZE; i++)
+    for(short i=0; i< getCurrentSubMenuSize() ; i++)
     {
       Serial.print("["); Serial.print(i); Serial.print("] "); Serial.println(_subMenu[_currentMenuIndex][i]);
     }
@@ -290,7 +288,8 @@ short ArkConfigMenu::handleSubMenu(String lastUserInput)
           lastUserInput.toCharArray(_config.wifi.password, lastUserInput.length()+1);
           // Saving configuration into EEPROM
           saveConfig();
-          Serial.println("Ark reactor will restart in 2 seconds...");
+          Serial.println("");
+          Serial.println("Wifi updated. Ark reactor will restart in 2 seconds...");
           delay(2000);
           ESP.restart();
           // To display sub-menu again
@@ -386,6 +385,14 @@ short ArkConfigMenu::getSubMenuIdFromIndex(short rootMenuIndex, short subMenuInd
 
 
 // ------------------------------------------------------------
+// Returns current submenu size
+short ArkConfigMenu::getCurrentSubMenuSize()
+{
+  return ((_currentMenuIndex==ROOT_MENU_INDEX__WIFI_CONFIG)? SUB_MENU_SIZE__WIFI : SUB_MENU_SIZE__FONT);
+}
+
+
+// ------------------------------------------------------------
 // Load configuration from Preferences
 void ArkConfigMenu::loadConfig()
 {
@@ -394,12 +401,11 @@ void ArkConfigMenu::loadConfig()
   prefs.begin(CONFIG_NAMESPACE, true);
   _config.version = prefs.getShort(CONFIG_OPTION__CONFIG_VERSION, INT_UNINITIALIZED);
   // Wifi
-  tmp = prefs.getString(CONFIG_OPTION__WIFI__SSID, STRING_UNINITIALIZED);
-  tmp.toCharArray(_config.wifi.ssid, tmp.length()+1);
-  tmp = prefs.getString(CONFIG_OPTION__WIFI__PASSWORD, STRING_UNINITIALIZED);
-  tmp.toCharArray(_config.wifi.password, tmp.length()+1);
+  convertStringToCharArray(prefs.getString(CONFIG_OPTION__WIFI__SSID, STRING_UNINITIALIZED), _config.wifi.ssid);
+  convertStringToCharArray(prefs.getString(CONFIG_OPTION__WIFI__PASSWORD, STRING_UNINITIALIZED), _config.wifi.password);
+  
   // Font
-  _config.font.colonBlink = prefs.getBool(CONFIG_OPTION__FONT__BLINKING_COLON, false);
+  _config.font.colonBlink = prefs.getBool(CONFIG_OPTION__FONT__BLINKING_COLON);
   prefs.end();
 
   _configFormatIsValid = true;
@@ -431,7 +437,6 @@ void ArkConfigMenu::saveConfig()
   prefs.putString(CONFIG_OPTION__WIFI__PASSWORD, _config.wifi.password);
   // Font
   prefs.putBool(CONFIG_OPTION__FONT__BLINKING_COLON, _config.font.colonBlink);
-
   prefs.end();
   // Because we saved it, config format is now valid again
   _configFormatIsValid = true;

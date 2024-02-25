@@ -13,7 +13,8 @@
 #define ROOT_MENU_INDEX__FONT_CONFIG 1
 
 // Sub menus
-#define SUB_MENU_SIZE 4
+#define SUB_MENU_SIZE__WIFI 4
+#define SUB_MENU_SIZE__FONT 3
 #define SUB_MENU__BACK 0
 // Wifi Config
 #define SUB_MENU__WIFI_CONFIG__VIEW 1
@@ -34,11 +35,12 @@
 #define EXPECTED_INPUT_TYPE_PROMPT__INT '#'
 #define EXPECTED_INPUT_TYPE_PROMPT__BOOL '&'
 
+// Identifiers for preferences. Max 15 chars
 #define CONFIG_NAMESPACE "ArkConfig"
 #define CONFIG_OPTION__CONFIG_VERSION "configVersion"
 #define CONFIG_OPTION__WIFI__SSID "wifiSSID"
 #define CONFIG_OPTION__WIFI__PASSWORD "wifiPassword"
-#define CONFIG_OPTION__FONT__BLINKING_COLON "fontBlinkingColon"
+#define CONFIG_OPTION__FONT__BLINKING_COLON "fontBlkColon"
 
 
 // To store Wifi Configuration
@@ -92,11 +94,11 @@ class ArkConfigMenu
     char _nextExpectedInputTypePrompt;
 
     char* _menu[ROOT_MENU_SIZE];
-    char* _subMenu[ROOT_MENU_SIZE][SUB_MENU_SIZE];
+    char* _subMenu[ROOT_MENU_SIZE][SUB_MENU_SIZE__WIFI];
 
     // Utilities
     short convertCharToInt(char c);
-    char* convertStringToCharArray(String text);
+    void convertStringToCharArray(String text, char* output);
 
     void printCurrentMenu();
     void setNextInputPrompt(String txt, char type=EXPECTED_INPUT_TYPE_PROMPT__STRING);
@@ -106,6 +108,8 @@ class ArkConfigMenu
 
     short getSubMenuIndexFromId(short rootMenuIndex, short subMenuId);
     short getSubMenuIdFromIndex(short rootMenuIndex, short subMenuIndex);
+
+    short getCurrentSubMenuSize();
 
     void loadConfig();
     void saveConfig();

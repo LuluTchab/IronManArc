@@ -99,20 +99,20 @@ void setup()
     const int nbMsBetweenChecks = 500;
 
     // We try to connect for a nbMsLeftToTry milliseconds
-    while((WiFi.status() != WL_CONNECTED) && (nbMsLeftToTry<0))
+    while((WiFi.status() != WL_CONNECTED) && (nbMsLeftToTry > 0))
     {
       delay(nbMsBetweenChecks);
       nbMsLeftToTry -= nbMsBetweenChecks;
     }
     
     // If we were able to connect on Wifi
-    if(WiFi.status() == WL_CONNECTED)
+    if(nbMsLeftToTry > 0)
     {
       timeClient.begin();
     }
     else
     {
-      displayTextOnOLED("Cannot connect on Wifi\nUse Serial port");
+      displayTextOnOLED("Wifi connect error\nUse Serial port");
     }
   }
 
@@ -170,18 +170,6 @@ void printWifiNetworks()
 }
 
 /*
-  Display time from string ('hh:mm' or 'hh mm') using text functionality
-*/
-void displayTimeStr(String timeStr)
-{
-  for(int i=0; i < timeStr.length(); i++)
-  {
-    display.write(char(timeStr[i]));
-  }
-}
-
-
-/*
   Display time from string ('hh:mm' or 'hh mm') using bitmaps
 */
 void displayTimeImg(String timeStr)
@@ -215,12 +203,19 @@ void displayTimeImg(String timeStr)
 void updateClockDisplay()
 {
   
-
   // For colon anim between hours and minutes
   if(seconds != previousSeconds)
   {
     previousSeconds = seconds;
-    colonDisplayed =! colonDisplayed;
+    if(configMenu.doesColonHaveToBlink())
+    {
+      colonDisplayed =! colonDisplayed;
+    }
+    else
+    {
+      // We do this in case of option is changed while colon is hidden, to make it appears again and stay
+      colonDisplayed = true;
+    }
   }
 
   String timeStr = "";
@@ -232,8 +227,6 @@ void updateClockDisplay()
   timeStr += String(minutes);
 
   // Displaying time
-  //displayTimeStr(timeStr);
-
   display.clearDisplay();
   displayTimeImg(timeStr);
 
