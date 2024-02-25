@@ -34,7 +34,7 @@
 //========================USEFUL VARIABLES=============================
 int UTC = 1; // UTC = value in hour (SUMMER TIME) [For example: Paris UTC+2 => UTC=2]
 
-
+#define SHORT_URL_CONFIG "https://t.ly/sFklh"
 
 
 const long utcOffsetInSeconds = 3600; // UTC + 1H / Offset in second
