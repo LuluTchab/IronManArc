@@ -38,7 +38,7 @@ ArkConfigMenu::ArkConfigMenu()
 // Start the configuration
 // NOTE: we cannot do this inside class constructor because it won't be
 // able to correcly load configuration from Preferences
-void ArkConfigMenu::begin(FontInfos fontList[], TimezoneInfos timezoneList[])
+void ArkConfigMenu::begin(WiFiClass wifiAdapter, FontInfos fontList[], TimezoneInfos timezoneList[])
 {
   Serial.begin(115200);
   while (!Serial) {
@@ -52,6 +52,7 @@ void ArkConfigMenu::begin(FontInfos fontList[], TimezoneInfos timezoneList[])
   _nextInputPrompt = INPUT_PROMPT__CHOICE;
 
   // Saving parameters
+  _wifiAdapter = wifiAdapter;
   _fontList = fontList;
   _timezoneList = timezoneList;
 
@@ -255,8 +256,21 @@ short ArkConfigMenu::handleSubMenu(String lastUserInput)
     // Wifi - list networks
     case SUB_MENU__WIFI_CONFIG__LIST_NETWORKS:
     {
-      // We gave back to caller the action that was selected
-      actionToReturn = SUB_MENU__WIFI_CONFIG__LIST_NETWORKS;
+      Serial.println("Scanning networks...");
+      int numSsid = _wifiAdapter.scanNetworks();
+
+      String ssid;
+      uint8_t encryptionType;
+      int32_t RSSI;
+      uint8_t* BSSID;
+      int32_t channel;
+
+      Serial.printf("%d network(s) found\n", numSsid);
+      for (int i = 0; i < numSsid; i++) 
+      {
+        _wifiAdapter.getNetworkInfo(i, ssid, encryptionType, RSSI, BSSID, channel);
+        Serial.printf("%d: %s - Channel:%d (%ddBm)\n", i + 1, ssid.c_str(), channel, RSSI);
+      }
       // To display sub-menu again
       _currentSubMenuIndex = INT_UNINITIALIZED;
       break;

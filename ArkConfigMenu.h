@@ -4,8 +4,12 @@
 // https://iotcircuithub.com/esp32-preferences-library-tutorial/
 #include <Preferences.h>
 #include "Arduino.h"
+// https://github.com/arduino-libraries/WiFi/tree/master
+#include "WiFi.h"
+
 #include "Fonts.h"
 #include "TimezoneDef.h"
+
 
 #define ARK_CONFIG_VERSION 1
 
@@ -90,7 +94,7 @@ class ArkConfigMenu
   public:
     ArkConfigMenu();
 
-    void begin(FontInfos fontList[], TimezoneInfos timezoneList[]);
+    void begin(WiFiClass wifiAdapter, FontInfos fontList[], TimezoneInfos timezoneList[]);
 
     short handleInput();
 
@@ -109,6 +113,7 @@ class ArkConfigMenu
     bool _configFormatIsValid;
     FontInfos* _fontList;
     TimezoneInfos* _timezoneList;
+    WiFiClass _wifiAdapter;
 
     // To store configuration
     ArkConfig _config;

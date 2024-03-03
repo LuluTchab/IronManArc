@@ -1,7 +1,7 @@
 /**************************************************************************
 
  **************************************************************************/
-
+#include <typeinfo>
 #include <SPI.h>
 #include <Wire.h>
 #include <Adafruit_GFX.h>
@@ -53,7 +53,7 @@ void setup()
   Serial.begin(115200);
 
   // Init configuration menu
-  configMenu.begin(allFonts, timezoneList);
+  configMenu.begin(WiFi, allFonts, timezoneList);
 
   // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
   if(!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) 
@@ -105,15 +105,8 @@ void loop()
 
   short actionToDo = configMenu.handleInput();
 
-  // If something has been requested through configuration menu
-  switch (actionToDo) 
-  {
-    // List available Wifi networks
-    case SUB_MENU__WIFI_CONFIG__LIST_NETWORKS: { printWifiNetworks(); break; }
-  }
-
   // If wifi is connected
-  if (WiFi.status() == WL_CONNECTED) 
+  if(WiFi.status() == WL_CONNECTED) 
   {
     // Update the time
     timeClient.update();
@@ -122,29 +115,6 @@ void loop()
 
     delay(200);
   }
-}
-
-
-
-// Prints Wifi networks
-void printWifiNetworks() 
-{
-  Serial.println("Scanning networks...");
-  int numSsid = WiFi.scanNetworks();
-
-  String ssid;
-  uint8_t encryptionType;
-  int32_t RSSI;
-  uint8_t* BSSID;
-  int32_t channel;
-
-  Serial.printf("%d network(s) found\n", numSsid);
-  for (int i = 0; i < numSsid; i++) 
-  {
-    WiFi.getNetworkInfo(i, ssid, encryptionType, RSSI, BSSID, channel);
-    Serial.printf("%d: %s - Channel:%d (%ddBm)\n", i + 1, ssid.c_str(), channel, RSSI);
-  }
-  Serial.println("");
 }
 
 
