@@ -197,7 +197,7 @@ void ArkConfigMenu::printCurrentMenu()
     Serial.println("= Select option =");
     for(short i=0; i<ROOT_MENU_SIZE; i++)
     {
-      Serial.print("["); Serial.print(i); Serial.print("] "); Serial.println(_menu[i]);
+      Serial.printf("[%d] %s\n", i, _menu[i]);
     }
     Serial.println("");
   }
@@ -206,10 +206,10 @@ void ArkConfigMenu::printCurrentMenu()
   {
     Serial.println("");
     // First we display root menu name
-    Serial.print("= "); Serial.print(_menu[_currentMenuIndex]); Serial.println(" =");
+    Serial.printf("= %s =\n", _menu[_currentMenuIndex]);
     for(short i=0; i< getCurrentSubMenuSize() ; i++)
     {
-      Serial.print("["); Serial.print(i); Serial.print("] "); Serial.println(_subMenu[_currentMenuIndex][i]);
+      Serial.printf("[%d] %s\n", i, _subMenu[_currentMenuIndex][i]);
     }
     Serial.println("");
   }
@@ -240,7 +240,7 @@ short ArkConfigMenu::handleSubMenu(String lastUserInput)
       if(_configFormatIsValid)
       {
         Serial.println("== Wifi config ==");
-        Serial.print(" SSID: "); Serial.println(getWifiSSID());
+        Serial.printf(" SSID: %s\n", getWifiSSID());
       }
       else
       {
@@ -310,8 +310,7 @@ short ArkConfigMenu::handleSubMenu(String lastUserInput)
     case SUB_MENU__TIME_CONFIG__VIEW:
     {
       Serial.println("== Time config ==");
-      Serial.print(" Current timezone: ");
-      Serial.println(getTimezoneInfos().name);
+      Serial.printf(" Current timezone: %s\n", getTimezoneInfos().name);
       // To display sub-menu again
       _currentSubMenuIndex = INT_UNINITIALIZED;
       break;
@@ -328,10 +327,9 @@ short ArkConfigMenu::handleSubMenu(String lastUserInput)
         {
           Serial.println("");
           // Displays available timezones with their name
-          for(short tzIdx=TIMEZONE_AEDT_AEST; tzIdx<TIMEZONE_PDT_PST; tzIdx++)
+          for(short i=0; i<NB_TIMEZONES; i++)
           {
-            Serial.print(" ["); Serial.print(tzIdx); Serial.print("] ");
-            Serial.println(_timezoneList[tzIdx].name);
+            Serial.printf("[%d] %s\n", i, _timezoneList[i].name);
           }
           Serial.println("");
           setNextInputPrompt("Select Timezone:", EXPECTED_INPUT_TYPE_PROMPT__INT);
@@ -359,8 +357,8 @@ short ArkConfigMenu::handleSubMenu(String lastUserInput)
     case SUB_MENU__FONT_CONFIG__VIEW:
     {
       Serial.println("== Font config ==");
-      Serial.print(" Is colon blinking? "); Serial.println((doesColonHaveToBlink())?"Yes":"No");
-      Serial.print(" Current font: "); Serial.println(getFontInfos().name);
+      Serial.printf(" Is colon blinking? %s\n", (doesColonHaveToBlink()?"Yes":"No"));
+      Serial.printf(" Current font: %s\n", getFontInfos().name);
       // To display sub-menu again
       _currentSubMenuIndex = INT_UNINITIALIZED;
       break;
@@ -405,8 +403,7 @@ short ArkConfigMenu::handleSubMenu(String lastUserInput)
           // Displays available timezones with their name
           for(short i=0; i<NB_FONTS; i++)
           {
-            Serial.print("["); Serial.print(i); Serial.print("] ");
-            Serial.println(_fontList[i].name);
+            Serial.printf("[%d] %s\n", i, _fontList[i].name);
           }
           Serial.println("");
           setNextInputPrompt("Select font:", EXPECTED_INPUT_TYPE_PROMPT__INT);
