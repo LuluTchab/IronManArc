@@ -12,7 +12,7 @@
 #include "WiFiManager.h"
 
 // Fonts
-#include "Fonts.h"
+//#include "Fonts.h"
 
 // Timezone definitions
 #include "TimezoneDef.h"
@@ -58,7 +58,7 @@ void setup()
 {
   Serial.begin(115200);
 
-  configMenu.begin();
+  configMenu.begin(allFonts);
 
   // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
   if(!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) 

@@ -3,6 +3,11 @@
   Theme: Avengers
 */
 
+#ifndef AvengersDigits_h
+#define AvengersDigits_h
+
+#include "Arduino.h"
+
 // 'avengersDigit0', 29x32px
 const unsigned char avengersDigit0 [] PROGMEM = {
 	0x00, 0x03, 0xfc, 0x00, 0x00, 0x0f, 0xff, 0x00, 0x00, 0x1f, 0xff, 0x80, 0x00, 0x3f, 0xff, 0x80, 
@@ -157,3 +162,5 @@ const unsigned char * avengersColonOrNot [] = {
   avengersNoColon,  // index 0 => bool(false) => no colon (:)
   avengersColon
 };
+
+#endif

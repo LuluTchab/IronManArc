@@ -4,7 +4,7 @@
 // https://iotcircuithub.com/esp32-preferences-library-tutorial/
 #include <Preferences.h>
 #include "Arduino.h"
-
+#include "Fonts.h"
 
 #define ARK_CONFIG_VERSION 1
 
@@ -89,7 +89,7 @@ class ArkConfigMenu
   public:
     ArkConfigMenu();
 
-    void begin();
+    void begin(FontInfo fontList[]);
 
     short handleInput();
 
@@ -106,6 +106,7 @@ class ArkConfigMenu
     bool _displayPrompt;
     short _userInputStep; // What input we are expecting
     bool _configFormatIsValid;
+    FontInfo* _fontList;
 
     // To store configuration
     ArkConfig _config;

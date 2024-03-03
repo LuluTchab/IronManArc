@@ -3,6 +3,11 @@
   Theme: Crystal
 */
 
+#ifndef CrystalDigits_h
+#define CrystalDigits_h
+
+#include "Arduino.h"
+
 // 'digit_0', 29x32px
 const unsigned char crystalDigit0 [] PROGMEM = {
 	0x00, 0x7f, 0xf8, 0x00, 0x00, 0xff, 0xfc, 0x00, 0x01, 0xff, 0xfe, 0x00, 0x03, 0xff, 0xff, 0x00, 
@@ -151,3 +156,5 @@ const unsigned char * crystalColonOrNot [] = {
   crystalNoColon,  // index 0 => bool(false) => pas de colon (:)
   crystalColon
 };
+
+#endif

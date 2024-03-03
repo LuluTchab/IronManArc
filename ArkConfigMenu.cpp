@@ -38,7 +38,7 @@ ArkConfigMenu::ArkConfigMenu()
 // Start the configuration
 // NOTE: we cannot do this inside class constructor because it won't be
 // able to correcly load configuration from Preferences
-void ArkConfigMenu::begin()
+void ArkConfigMenu::begin(FontInfo fontList[])
 {
   Serial.begin(115200);
   while (!Serial) {
@@ -50,6 +50,9 @@ void ArkConfigMenu::begin()
   // At beginning, we expect for INT to navigate into menu
   _nextExpectedInputTypePrompt = EXPECTED_INPUT_TYPE_PROMPT__INT;
   _nextInputPrompt = INPUT_PROMPT__CHOICE;
+
+  _fontList = fontList;
+
   // We start by displaying the menu
   printCurrentMenu();
 
@@ -234,8 +237,8 @@ short ArkConfigMenu::handleSubMenu(String lastUserInput)
     {
       if(_configFormatIsValid)
       {
-        Serial.println("== Wifi Config ==");
-        Serial.print(" SSID: "); Serial.println(_config.wifi.ssid);
+        Serial.println("== Wifi config ==");
+        Serial.print(" SSID: "); Serial.println(getWifiSSID());
       }
       else
       {
@@ -304,7 +307,7 @@ short ArkConfigMenu::handleSubMenu(String lastUserInput)
     // Time - View Config
     case SUB_MENU__TIME_CONFIG__VIEW:
     {
-      Serial.println("== Time Config ==");
+      Serial.println("== Time config ==");
       // Make caller to display timezone name
       actionToReturn = SUB_MENU__TIME_CONFIG__VIEW;
       // To display sub-menu again
@@ -347,9 +350,10 @@ short ArkConfigMenu::handleSubMenu(String lastUserInput)
     // Font - View Config
     case SUB_MENU__FONT_CONFIG__VIEW:
     {
-      Serial.println("== Font Config ==");
-      Serial.print(" Colon is blinking: "); Serial.println((_config.font.colonBlink)?"Yes":"No");
-      actionToReturn = SUB_MENU__FONT_CONFIG__VIEW;
+      Serial.println("== Font config ==");
+      Serial.print(" Is colon blinking? "); Serial.println((doesColonHaveToBlink())?"Yes":"No");
+      Serial.print(" Current font: "); Serial.println(_fontList[getFontNo()].name);
+      Serial.println("");
       // To display sub-menu again
       _currentSubMenuIndex = INT_UNINITIALIZED;
       break;
