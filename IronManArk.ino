@@ -18,8 +18,6 @@
 #include "ArkConfigMenu.h"
 
 
-const long UTC_OFFSET_IN_SECONDS = 3600;  // UTC + 1H / Offset in second
-
 // Define NTP Client to get time
 WiFiUDP ntpUDP;
 // https://github.com/arduino-libraries/NTPClient
@@ -110,27 +108,13 @@ void loop()
   short actionToDo = configMenu.handleInput();
 
   // If something has been requested through configuration menu
-  switch (actionToDo) {
+  switch (actionToDo) 
+  {
     // List available Wifi networks
-    case SUB_MENU__WIFI_CONFIG__LIST_NETWORKS:
-      {
-        printWifiNetworks();
-        break;
-      }
-
-    // Set current UTC Timezone
-    case SUB_MENU__TIME_CONFIG__SET:
-      {
-        // Displays available timezones with their name
-        for(short tzIdx=TIMEZONE_AEDT_AEST; tzIdx<TIMEZONE_PDT_PST; tzIdx++ )
-        {
-          Serial.print(" ["); Serial.print(tzIdx); Serial.print("] ");
-          Serial.println(timezoneList[tzIdx].name);
-        }
-        break;
-      }
+    case SUB_MENU__WIFI_CONFIG__LIST_NETWORKS: { printWifiNetworks(); break; }
+    case SUB_MENU__TIME_CONFIG__SET: { printTimezoneList(); break; }
+    case SUB_MENU__TIME_CONFIG__VIEW: { printCurrentTimeZone(); break; }
   }
-
 
   // If wifi is connected
   if (WiFi.status() == WL_CONNECTED) 
@@ -142,6 +126,26 @@ void loop()
 
     delay(200);
   }
+}
+
+// Displays available timezone list
+void printTimezoneList()
+{
+  // Displays available timezones with their name
+  for(short tzIdx=TIMEZONE_AEDT_AEST; tzIdx<TIMEZONE_PDT_PST; tzIdx++ )
+  {
+    Serial.print(" ["); Serial.print(tzIdx); Serial.print("] ");
+    Serial.println(timezoneList[tzIdx].name);
+    Serial.println("");
+  }
+}
+
+// Displays current timezone information
+void printCurrentTimeZone()
+{
+  Serial.print("Current timezone: ");
+  Serial.println(timezoneList[configMenu.getTimezone()].name);
+  Serial.println("");
 }
 
 // Prints Wifi networks
@@ -157,7 +161,8 @@ void printWifiNetworks()
   int32_t channel;
 
   Serial.printf("%d network(s) found\n", numSsid);
-  for (int i = 0; i < numSsid; i++) {
+  for (int i = 0; i < numSsid; i++) 
+  {
     WiFi.getNetworkInfo(i, ssid, encryptionType, RSSI, BSSID, channel);
     Serial.printf("%d: %s - Channel:%d (%ddBm)\n", i + 1, ssid.c_str(), channel, RSSI);
   }
@@ -168,6 +173,7 @@ void printWifiNetworks()
 void updateClockDisplay() 
 {
   char timeStr[5];
+  // Get time in current defined timezone
   time_t t = timezoneList[configMenu.getTimezone()].tz.toLocal(timeClient.getEpochTime());
 
   int nextCharOffset = 0;  // offset for next character to draw

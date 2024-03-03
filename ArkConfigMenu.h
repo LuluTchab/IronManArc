@@ -116,9 +116,9 @@ class ArkConfigMenu
 
     void printCurrentMenu();
     void setNextInputPrompt(String txt, char type=EXPECTED_INPUT_TYPE_PROMPT__STRING);
-    void displayNextInputPrompt();
+    void printNextInputPrompt();
     short handleSubMenu(String lastUserInput);
-    void displayInvalidConfigMessage();
+    void printInvalidConfigMessage();
 
     short getSubMenuIndexFromId(short rootMenuIndex, short subMenuId);
     short getSubMenuIdFromIndex(short rootMenuIndex, short subMenuIndex);

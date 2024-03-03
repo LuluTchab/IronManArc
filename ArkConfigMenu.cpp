@@ -70,7 +70,7 @@ short ArkConfigMenu::handleInput()
   if(_displayPrompt)
   {
     _displayPrompt = false;
-    displayNextInputPrompt();
+    printNextInputPrompt();
     
   }
   else
@@ -156,7 +156,7 @@ void ArkConfigMenu::setNextInputPrompt(String txt, char type)
 
 // ------------------------------------------------------------
 // Displays next user input prompt, with char to identify type
-void ArkConfigMenu::displayNextInputPrompt()
+void ArkConfigMenu::printNextInputPrompt()
 {
   Serial.print(_nextInputPrompt);
   Serial.println(_nextExpectedInputTypePrompt);
@@ -237,7 +237,7 @@ short ArkConfigMenu::handleSubMenu(String lastUserInput)
       }
       else
       {
-        displayInvalidConfigMessage();
+        printInvalidConfigMessage();
       }
       // To display sub-menu again
       _currentSubMenuIndex = INT_UNINITIALIZED;
@@ -303,8 +303,8 @@ short ArkConfigMenu::handleSubMenu(String lastUserInput)
     case SUB_MENU__TIME_CONFIG__VIEW:
     {
       Serial.println("== Time Config ==");
-      Serial.print(" UTC Timezone: "); 
-      Serial.println(_config.time.timezone);
+      // Make caller to display timezone name
+      actionToReturn = SUB_MENU__TIME_CONFIG__VIEW;
       // To display sub-menu again
       _currentSubMenuIndex = INT_UNINITIALIZED;
       break;
@@ -399,7 +399,7 @@ short ArkConfigMenu::handleSubMenu(String lastUserInput)
 
 
 // ------------------------------------------------------------
-void ArkConfigMenu::displayInvalidConfigMessage()
+void ArkConfigMenu::printInvalidConfigMessage()
 {
   Serial.println("!! Configuration is invalid, please update it !!");
 }
