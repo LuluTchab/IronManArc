@@ -31,17 +31,12 @@
 #include "wifiConfig.h"
 #include "ArkConfigMenu.h"
 
-//========================USEFUL VARIABLES=============================
-int UTC = 1; // UTC = value in hour (SUMMER TIME) [For example: Paris UTC+2 => UTC=2]
-
-#define SHORT_URL_CONFIG "https://t.ly/sFklh"
-
-
-const long utcOffsetInSeconds = 3600; // UTC + 1H / Offset in second
+const long UTC_OFFSET_IN_SECONDS = 3600; // UTC + 1H / Offset in second
 
 // Define NTP Client to get time
 WiFiUDP ntpUDP;
-NTPClient timeClient(ntpUDP, "pool.ntp.org", utcOffsetInSeconds*UTC);
+// https://github.com/arduino-libraries/NTPClient
+NTPClient timeClient(ntpUDP, "pool.ntp.org");
 
 // ==============================================================================
 
@@ -89,7 +84,7 @@ void setup()
   // If configuration is not valid
   if(!configMenu.isConfigFormatValid())
   {
-    displayTextOnOLED("Invalid config\nUse Serial port");
+    displayTextOnOLED("Invalid config\nUse Serial port\nhttps://t.ly/sFklh");
   }
   else // Configuration is valid
   {
@@ -109,10 +104,12 @@ void setup()
     if(nbMsLeftToTry > 0)
     {
       timeClient.begin();
+      // Init timezone
+      timeClient.setTimeOffset(UTC_OFFSET_IN_SECONDS * configMenu.getUTCTimezone());
     }
     else
     {
-      displayTextOnOLED("Wifi connect error\nUse Serial port");
+      displayTextOnOLED("Wifi connect error\nUse Serial port\nhttps://t.ly/sFklh");
     }
   }
 
@@ -125,11 +122,24 @@ void loop()
 
   short actionToDo = configMenu.handleInput();
 
-  // If it has been requested to print wifi networks
-  if(actionToDo == SUB_MENU__WIFI_CONFIG__LIST_NETWORKS)
+  // If something has been requested through configuration menu
+  switch(actionToDo)
   {
-    printWifiNetworks();
+    // List available Wifi networks
+    case SUB_MENU__WIFI_CONFIG__LIST_NETWORKS: 
+    { 
+      printWifiNetworks(); 
+      break; 
+    }
+    
+    // Set current UTC Timezone
+    case SUB_MENU__TIME_CONFIG__SET: 
+    { 
+      timeClient.setTimeOffset(UTC_OFFSET_IN_SECONDS * configMenu.getUTCTimezone()); 
+      break; 
+    }
   }
+  
 
   // If wifi is connected
   if(WiFi.status() == WL_CONNECTED)
@@ -142,6 +152,7 @@ void loop()
     seconds = timeClient.getSeconds();
 
     updateClockDisplay();
+  
     delay(200);
   }
 

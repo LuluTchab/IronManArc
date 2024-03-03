@@ -12,12 +12,20 @@ ArkConfigMenu::ArkConfigMenu()
   _displayPrompt = true;
   _configFormatIsValid = false;
 
+  // - Wifi
   _menu[ROOT_MENU_INDEX__WIFI_CONFIG] = "Wifi config";
   _subMenu[ROOT_MENU_INDEX__WIFI_CONFIG][SUB_MENU__BACK] = "Back";
   _subMenu[ROOT_MENU_INDEX__WIFI_CONFIG][getSubMenuIndexFromId(ROOT_MENU_INDEX__WIFI_CONFIG, SUB_MENU__WIFI_CONFIG__VIEW)] = "View current config";
   _subMenu[ROOT_MENU_INDEX__WIFI_CONFIG][getSubMenuIndexFromId(ROOT_MENU_INDEX__WIFI_CONFIG, SUB_MENU__WIFI_CONFIG__LIST_NETWORKS)] = "List available networks";
   _subMenu[ROOT_MENU_INDEX__WIFI_CONFIG][getSubMenuIndexFromId(ROOT_MENU_INDEX__WIFI_CONFIG, SUB_MENU__WIFI_CONFIG__SET)] = "Set SSID/Password";
   
+  // - Time
+  _menu[ROOT_MENU_INDEX__TIME_CONFIG] = "Time config";
+  _subMenu[ROOT_MENU_INDEX__TIME_CONFIG][SUB_MENU__BACK] = "Back";
+  _subMenu[ROOT_MENU_INDEX__TIME_CONFIG][getSubMenuIndexFromId(ROOT_MENU_INDEX__TIME_CONFIG, SUB_MENU__TIME_CONFIG__VIEW)] = "View current config";
+  _subMenu[ROOT_MENU_INDEX__TIME_CONFIG][getSubMenuIndexFromId(ROOT_MENU_INDEX__TIME_CONFIG, SUB_MENU__TIME_CONFIG__SET)] = "Set timezone";
+
+  // - Font
   _menu[ROOT_MENU_INDEX__FONT_CONFIG] = "Font config";
   _subMenu[ROOT_MENU_INDEX__FONT_CONFIG][SUB_MENU__BACK] = "Back";
   _subMenu[ROOT_MENU_INDEX__FONT_CONFIG][getSubMenuIndexFromId(ROOT_MENU_INDEX__FONT_CONFIG, SUB_MENU__FONT_CONFIG__VIEW)] = "View current config";
@@ -83,7 +91,7 @@ short ArkConfigMenu::handleInput()
         // if we are navigating into menus
         if(_currentMenuIndex==INT_UNINITIALIZED || _currentSubMenuIndex==INT_UNINITIALIZED)
         {
-          int requestedMenuIndex = convertCharToInt(userInput[0]);
+          int requestedMenuIndex = convertStringToInt(userInput);
 
           // if root menu is displayed but nothing is selected
           if(_currentMenuIndex == INT_UNINITIALIZED)
@@ -159,6 +167,7 @@ void ArkConfigMenu::displayNextInputPrompt()
 // Returns Configuration information
 char* ArkConfigMenu::getWifiSSID() { return _config.wifi.ssid; }
 char* ArkConfigMenu::getWifiPassword() { return _config.wifi.password; }
+short ArkConfigMenu::getUTCTimezone() { return _config.time.timezone; }
 bool ArkConfigMenu::doesColonHaveToBlink() { return _config.font.colonBlink; }
 
 // ------------------------------------------------------------
@@ -177,6 +186,30 @@ short ArkConfigMenu::convertCharToInt(char c)
   if(c=='9') return 9;
 
   return -1;
+}
+
+// ------------------------------------------------------------
+// Converts string to Int
+short ArkConfigMenu::convertStringToInt(String s)
+{
+  short result=0;
+  short numberMultiplier=1;
+  short posOrNeg = 1; // To deternine if number is positive (1) or negative (-1)
+  s.trim();
+  for(short i=0; i < s.length(); i++)
+  {
+    if(s[i] == '-')
+    {
+      posOrNeg = -1;
+    }
+    else if(s[i] != '+')
+    {
+      result = (result * numberMultiplier) + convertCharToInt(s[i]);
+      numberMultiplier *= 10;
+    }
+  }
+
+  return result * posOrNeg;
 }
 
 // ------------------------------------------------------------
@@ -231,6 +264,9 @@ short ArkConfigMenu::handleSubMenu(String lastUserInput)
   // Depending sub-menu that was selected
   switch(getSubMenuIdFromIndex(_currentMenuIndex, _currentSubMenuIndex))
   {
+
+    // ------------------------------------------------------------------------------------------------
+
     // --------------------
     // Wifi - View Config
     case SUB_MENU__WIFI_CONFIG__VIEW:
@@ -276,7 +312,6 @@ short ArkConfigMenu::handleSubMenu(String lastUserInput)
         case 1:
         {
           // Saving Wifi SSID that was just given
-          
           lastUserInput.toCharArray(_config.wifi.ssid, lastUserInput.length()+1);
           setNextInputPrompt("Enter Wifi Password", EXPECTED_INPUT_TYPE_PROMPT__PASSWORD);
           break;
@@ -299,7 +334,54 @@ short ArkConfigMenu::handleSubMenu(String lastUserInput)
       }
       break;
     }
+
+
+    // ------------------------------------------------------------------------------------------------
+
+
+    // --------------------
+    // Time - View Config
+    case SUB_MENU__TIME_CONFIG__VIEW:
+    {
+      Serial.println("== Time Config ==");
+      Serial.print(" UTC Timezone: "); 
+      if(_config.time.timezone > 0) Serial.print("+");
+      Serial.println(_config.time.timezone);
+      // To display sub-menu again
+      _currentSubMenuIndex = INT_UNINITIALIZED;
+      break;
+    }
+
+    // --------------------
+    // Time - Set config
+    case SUB_MENU__TIME_CONFIG__SET:
+    {
+      switch(_userInputStep)
+      {
+        // We have to ask for UTC timezone
+        case 0:
+        {
+          setNextInputPrompt("Enter UTC timezone (ex: +1):", EXPECTED_INPUT_TYPE_PROMPT__INT);
+          break;
+        }
+        // Info about UTC timezone has been given
+        case 1:
+        {
+          _config.time.timezone = convertStringToInt(lastUserInput);
+          saveConfig();
+          actionToReturn = SUB_MENU__TIME_CONFIG__SET;
+          // To display sub-menu again
+          _currentSubMenuIndex = INT_UNINITIALIZED;
+          break;
+        }
+      }
+      break;
+    }
   
+
+    // ------------------------------------------------------------------------------------------------
+
+
     // --------------------
     // Font - View Config
     case SUB_MENU__FONT_CONFIG__VIEW:
@@ -354,7 +436,6 @@ short ArkConfigMenu::handleSubMenu(String lastUserInput)
   if(_currentSubMenuIndex == INT_UNINITIALIZED) printCurrentMenu();
 
   return actionToReturn;
-  
 }
 
 
@@ -388,7 +469,12 @@ short ArkConfigMenu::getSubMenuIdFromIndex(short rootMenuIndex, short subMenuInd
 // Returns current submenu size
 short ArkConfigMenu::getCurrentSubMenuSize()
 {
-  return ((_currentMenuIndex==ROOT_MENU_INDEX__WIFI_CONFIG)? SUB_MENU_SIZE__WIFI : SUB_MENU_SIZE__FONT);
+  switch(_currentMenuIndex)
+  {
+    case ROOT_MENU_INDEX__WIFI_CONFIG: { return SUB_MENU_SIZE__WIFI; }
+    case ROOT_MENU_INDEX__TIME_CONFIG: { return SUB_MENU_SIZE__TIME; }
+    case ROOT_MENU_INDEX__FONT_CONFIG: { return SUB_MENU_SIZE__FONT; }
+  }
 }
 
 
@@ -404,6 +490,9 @@ void ArkConfigMenu::loadConfig()
   convertStringToCharArray(prefs.getString(CONFIG_OPTION__WIFI__SSID, STRING_UNINITIALIZED), _config.wifi.ssid);
   convertStringToCharArray(prefs.getString(CONFIG_OPTION__WIFI__PASSWORD, STRING_UNINITIALIZED), _config.wifi.password);
   
+  // Time
+  _config.time.timezone = prefs.getShort(CONFIG_OPTION__TIME__TIMEZONE);
+
   // Font
   _config.font.colonBlink = prefs.getBool(CONFIG_OPTION__FONT__BLINKING_COLON);
   prefs.end();
@@ -435,6 +524,8 @@ void ArkConfigMenu::saveConfig()
   // Wifi
   prefs.putString(CONFIG_OPTION__WIFI__SSID, _config.wifi.ssid);
   prefs.putString(CONFIG_OPTION__WIFI__PASSWORD, _config.wifi.password);
+  // Time
+  prefs.putShort(CONFIG_OPTION__TIME__TIMEZONE, _config.time.timezone);
   // Font
   prefs.putBool(CONFIG_OPTION__FONT__BLINKING_COLON, _config.font.colonBlink);
   prefs.end();
