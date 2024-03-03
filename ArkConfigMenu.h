@@ -17,7 +17,7 @@
 // Sub menus
 #define SUB_MENU_SIZE__WIFI 4
 #define SUB_MENU_SIZE__TIME 3
-#define SUB_MENU_SIZE__FONT 3
+#define SUB_MENU_SIZE__FONT 4
 #define SUB_MENU__BACK 0
 // Wifi Config
 #define SUB_MENU__WIFI_CONFIG__VIEW 1
@@ -29,6 +29,8 @@
 // Font Config
 #define SUB_MENU__FONT_CONFIG__VIEW 21
 #define SUB_MENU__FONT_CONFIG__TOGGLE_BLINK 22
+#define SUB_MENU__FONT_CONFIG__SET_FONT 23
+
 
 #define INT_UNINITIALIZED -1
 #define STRING_UNINITIALIZED "?no value?"
@@ -48,6 +50,7 @@
 #define CONFIG_OPTION__WIFI__PASSWORD "wifiPassword"
 #define CONFIG_OPTION__TIME__TIMEZONE "timeZone"
 #define CONFIG_OPTION__FONT__BLINKING_COLON "fontBlkColon"
+#define CONFIG_OPTION__FONT__NO "fontNo"
 
 
 // To store Wifi Configuration
@@ -67,6 +70,7 @@ struct ArkTimeConfig
 struct ArkFontConfig
 {
   bool colonBlink;
+  short fontNo;
 };
 
 // Structure to store whole ARK Clock configuration
@@ -94,6 +98,7 @@ class ArkConfigMenu
     char* getWifiSSID();
     char* getWifiPassword();
     short getTimezone();
+    short getFontNo();
     bool doesColonHaveToBlink();
 
   protected:

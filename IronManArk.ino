@@ -5,11 +5,14 @@
 #include <SPI.h>
 #include <Wire.h>
 #include <Adafruit_GFX.h>
+// https://github.com/adafruit/Adafruit_SSD1306
 #include <Adafruit_SSD1306.h>
 #include "StartupLogo.h"
-#include "AvengersDigits.h"
 #include "NTPClient.h"
 #include "WiFiManager.h"
+
+// Fonts
+#include "Fonts.h"
 
 // Timezone definitions
 #include "TimezoneDef.h"
@@ -114,6 +117,8 @@ void loop()
     case SUB_MENU__WIFI_CONFIG__LIST_NETWORKS: { printWifiNetworks(); break; }
     case SUB_MENU__TIME_CONFIG__SET: { printTimezoneList(); break; }
     case SUB_MENU__TIME_CONFIG__VIEW: { printCurrentTimeZone(); break; }
+    case SUB_MENU__FONT_CONFIG__VIEW: { printCurrentFont(); break; }
+    case SUB_MENU__FONT_CONFIG__SET_FONT: { printFontList(); break; }
   }
 
   // If wifi is connected
@@ -122,7 +127,7 @@ void loop()
     // Update the time
     timeClient.update();
 
-    updateClockDisplay();
+    updateOLEDClockDisplay();
 
     delay(200);
   }
@@ -131,20 +136,29 @@ void loop()
 // Displays available timezone list
 void printTimezoneList()
 {
+  Serial.println("");
   // Displays available timezones with their name
-  for(short tzIdx=TIMEZONE_AEDT_AEST; tzIdx<TIMEZONE_PDT_PST; tzIdx++ )
+  for(short tzIdx=TIMEZONE_AEDT_AEST; tzIdx<TIMEZONE_PDT_PST; tzIdx++)
   {
     Serial.print(" ["); Serial.print(tzIdx); Serial.print("] ");
     Serial.println(timezoneList[tzIdx].name);
-    Serial.println("");
   }
+  Serial.println("");
 }
 
 // Displays current timezone information
 void printCurrentTimeZone()
 {
-  Serial.print("Current timezone: ");
+  Serial.print(" Current timezone: ");
   Serial.println(timezoneList[configMenu.getTimezone()].name);
+  Serial.println("");
+}
+
+// Displays current font name
+void printCurrentFont()
+{
+  Serial.print(" Current font: "); 
+  Serial.println(allFonts[configMenu.getFontNo()].name);
   Serial.println("");
 }
 
@@ -169,8 +183,21 @@ void printWifiNetworks()
   Serial.println("");
 }
 
+// Displays available timezone list
+void printFontList()
+{
+  Serial.println("");
+  // Displays available timezones with their name
+  for(short i=0; i<NB_FONTS; i++)
+  {
+    Serial.print(" ["); Serial.print(i); Serial.print("] ");
+    Serial.println(allFonts[i].name);
+  }
+  Serial.println("");
+}
 
-void updateClockDisplay() 
+// Update clock display on OLED
+void updateOLEDClockDisplay() 
 {
   char timeStr[5];
   // Get time in current defined timezone
@@ -210,13 +237,15 @@ void updateClockDisplay()
     if(curChar == ':' || curChar == ' ') 
     {
       nextCharOffset += COLON_WIDTH;
-      display.drawBitmap(curOffset, 0, avengerColonOrNot[(curChar == ' ') ? 0 : 1], COLON_WIDTH, SCREEN_HEIGHT, 1);
+      display.drawBitmap(curOffset, 0, allFonts[configMenu.getFontNo()].colonOrNot[(curChar == ' ') ? withoutColon : withColon], COLON_WIDTH, SCREEN_HEIGHT, 1);
     } 
     else  // we have to display a digit
     {
       nextCharOffset += DIGIT_WIDTH;
       // Displaying digit by pointing on it in 'all digits bitmap array' by it index (corresponding to the number we have to display. number 0 => index 0 in array)
-      display.drawBitmap(curOffset, 0, allAvengerDigits[String(timeStr[i]).toInt()], DIGIT_WIDTH, SCREEN_HEIGHT, 1);
+      //display.drawBitmap(curOffset, 0, allAvengerDigits[String(timeStr[i]).toInt()], DIGIT_WIDTH, SCREEN_HEIGHT, 1);
+      display.drawBitmap(curOffset, 0, allFonts[configMenu.getFontNo()].allDigits[String(timeStr[i]).toInt()], DIGIT_WIDTH, SCREEN_HEIGHT, 1);
+      
     }
   }
 

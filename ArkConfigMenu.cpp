@@ -30,7 +30,8 @@ ArkConfigMenu::ArkConfigMenu()
   _subMenu[ROOT_MENU_INDEX__FONT_CONFIG][SUB_MENU__BACK] = "Back";
   _subMenu[ROOT_MENU_INDEX__FONT_CONFIG][getSubMenuIndexFromId(ROOT_MENU_INDEX__FONT_CONFIG, SUB_MENU__FONT_CONFIG__VIEW)] = "View current config";
   _subMenu[ROOT_MENU_INDEX__FONT_CONFIG][getSubMenuIndexFromId(ROOT_MENU_INDEX__FONT_CONFIG, SUB_MENU__FONT_CONFIG__TOGGLE_BLINK)] = "Toggle blinking colon";
-
+  _subMenu[ROOT_MENU_INDEX__FONT_CONFIG][getSubMenuIndexFromId(ROOT_MENU_INDEX__FONT_CONFIG, SUB_MENU__FONT_CONFIG__SET_FONT)] = "Set font";
+  
 }
 
 // ------------------------------------------------------------
@@ -168,6 +169,7 @@ void ArkConfigMenu::printNextInputPrompt()
 char* ArkConfigMenu::getWifiSSID() { return _config.wifi.ssid; }
 char* ArkConfigMenu::getWifiPassword() { return _config.wifi.password; }
 short ArkConfigMenu::getTimezone() { return _config.time.timezone; }
+short ArkConfigMenu::getFontNo() { return _config.font.fontNo; }
 bool ArkConfigMenu::doesColonHaveToBlink() { return _config.font.colonBlink; }
 
 
@@ -347,6 +349,7 @@ short ArkConfigMenu::handleSubMenu(String lastUserInput)
     {
       Serial.println("== Font Config ==");
       Serial.print(" Colon is blinking: "); Serial.println((_config.font.colonBlink)?"Yes":"No");
+      actionToReturn = SUB_MENU__FONT_CONFIG__VIEW;
       // To display sub-menu again
       _currentSubMenuIndex = INT_UNINITIALIZED;
       break;
@@ -356,7 +359,6 @@ short ArkConfigMenu::handleSubMenu(String lastUserInput)
     // Font - Toggle blink
     case SUB_MENU__FONT_CONFIG__TOGGLE_BLINK:
     {
-      
       switch(_userInputStep)
       {
         // We have to ask for Colon blinking or not
@@ -370,6 +372,33 @@ short ArkConfigMenu::handleSubMenu(String lastUserInput)
         {
           lastUserInput.toLowerCase();
           _config.font.colonBlink = (lastUserInput == "y");
+          saveConfig();
+          // To display sub-menu again
+          _currentSubMenuIndex = INT_UNINITIALIZED;
+          break;
+        }
+      }
+      break;
+    }
+
+    // --------------------
+    // Font - Set font
+    case SUB_MENU__FONT_CONFIG__SET_FONT:
+    {
+      switch(_userInputStep)
+      {
+        // We have to ask for a Font
+        case 0:
+        {
+          // To make caller display font list
+          actionToReturn = SUB_MENU__FONT_CONFIG__SET_FONT;
+          setNextInputPrompt("Select font:", EXPECTED_INPUT_TYPE_PROMPT__INT);
+          break;
+        }
+        // Info about font has been given
+        case 1:
+        {
+          _config.font.fontNo = lastUserInput.toInt();
           saveConfig();
           // To display sub-menu again
           _currentSubMenuIndex = INT_UNINITIALIZED;

@@ -1,7 +1,6 @@
 /*
-  Définition des digits utilisés pour l'affichage de l'heure.
-
-  Thème: Avengers
+  Resources to display time.
+  Theme: Avengers
 */
 
 // 'avengersDigit0', 29x32px
@@ -124,7 +123,7 @@ const unsigned char avengersDigit9 [] PROGMEM = {
 	0x1f, 0xff, 0xe0, 0x00, 0x1f, 0xff, 0xc0, 0x00, 0x1f, 0xff, 0xc0, 0x00, 0x1f, 0xff, 0x00, 0x00
 };
 
-// Tableau avec tous les Digits Avengers
+// Array with all digits
 const unsigned char * allAvengerDigits [] = {
   avengersDigit0,
   avengersDigit1,
@@ -154,7 +153,7 @@ const unsigned char avengersNoColon [] PROGMEM = {
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 };
 
-const unsigned char * avengerColonOrNot [] = {
-  avengersNoColon,  // index 0 => bool(false) => pas de colon (:)
+const unsigned char * avengersColonOrNot [] = {
+  avengersNoColon,  // index 0 => bool(false) => no colon (:)
   avengersColon
 };
