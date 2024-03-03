@@ -69,7 +69,8 @@ bool colonDisplayed;
 // Configuration menu
 ArkConfigMenu configMenu;
 
-void setup() {
+void setup()
+{
   Serial.begin(115200);
 
   configMenu.begin();
@@ -114,7 +115,8 @@ void setup() {
   colonDisplayed = true;
 }
 
-void loop() {
+void loop() 
+{
 
   short actionToDo = configMenu.handleInput();
 
@@ -148,7 +150,8 @@ void loop() {
 }
 
 // Prints Wifi networks
-void printWifiNetworks() {
+void printWifiNetworks() 
+{
   Serial.println("Scanning networks...");
   int numSsid = WiFi.scanNetworks();
 
@@ -166,73 +169,64 @@ void printWifiNetworks() {
   Serial.println("");
 }
 
-/*
-  Display time from string ('hh:mm' or 'hh mm') using bitmaps
-*/
-void displayTimeImg(String timeStr) {
+
+void updateClockDisplay() 
+{
+  char timeStr[5];
+  time_t t = timezoneList[TIMEZONE_CET_CEST].tz.toLocal(timeClient.getEpochTime());
+
   int nextCharOffset = 0;  // offset for next character to draw
   int curOffset;           // x Offset to draw bitmaps
   char curChar;            // current character to draw
 
+  // For colon anim between hours and minutes
+  if (second(t) != previousSeconds) 
+  {
+    previousSeconds = second(t);
+    if (configMenu.doesColonHaveToBlink()) 
+    {
+      colonDisplayed = !colonDisplayed;
+    }
+    else 
+    {
+      // We do this in case of option is changed while colon is hidden, to make it appears again and stay
+      colonDisplayed = true;
+    }
+  }
+  // defining string to display
+  sprintf(timeStr, "%.2d%s%.2d", hour(t), ((colonDisplayed) ? ":" : " "), minute(t));
+
+  // Displaying time
+  display.clearDisplay();
+  
   // Looping through characters composing time to display
-  for (int i = 0; i < timeStr.length(); i++) {
+  for(int i = 0; i < 5; i++) 
+  {
     curChar = timeStr[i];
     curOffset = nextCharOffset;
 
     // If we have to display char between hours and minutes
-    if (curChar == ':' || curChar == ' ') {
+    if (curChar == ':' || curChar == ' ') 
+    {
       nextCharOffset += COLON_WIDTH;
       display.drawBitmap(curOffset, 0, avengerColonOrNot[(curChar == ' ') ? 0 : 1], COLON_WIDTH, SCREEN_HEIGHT, 1);
-    } else  // we have to display a digit
+    } 
+    else  // we have to display a digit
     {
       nextCharOffset += DIGIT_WIDTH;
       // Displaying digit by pointing on it in 'all digits bitmap array' by it index (corresponding to the number we have to display. number 0 => index 0 in array)
       display.drawBitmap(curOffset, 0, allAvengerDigits[String(timeStr[i]).toInt()], DIGIT_WIDTH, SCREEN_HEIGHT, 1);
     }
   }
-}
 
-
-void updateClockDisplay() {
-  int hours, minutes, seconds;
-
-  time_t t = timezoneList[TIMEZONE_CET_CEST].tz.toLocal(timeClient.getEpochTime());
-
-  hours = hour(t);
-  minutes = minute(t);
-  seconds = second(t);
-
-  // For colon anim between hours and minutes
-  if (seconds != previousSeconds) {
-    previousSeconds = seconds;
-    if (configMenu.doesColonHaveToBlink()) {
-      colonDisplayed = !colonDisplayed;
-    } else {
-      // We do this in case of option is changed while colon is hidden, to make it appears again and stay
-      colonDisplayed = true;
-    }
-  }
-
-  String timeStr = "";
-  if (hours < 10) timeStr += "0";
-  timeStr += String(hours);
-  timeStr += (colonDisplayed) ? ":" : " ";
-  // Minutes
-  if (minutes < 10) timeStr += "0";
-  timeStr += String(minutes);
-
-  // Displaying time
-  display.clearDisplay();
-  displayTimeImg(timeStr);
-
-
-  display.display();  // Show initial text
+  display.display();
 }
 
 /*
   Displays startup logo
 */
-void displayStartupLogo() {
+void displayStartupLogo() 
+{
   display.clearDisplay();
 
   display.drawBitmap(
@@ -247,7 +241,8 @@ void displayStartupLogo() {
 /*
   Displays given text on OLED screen
 */
-void displayTextOnOLED(String text) {
+void displayTextOnOLED(String text) 
+{
   display.clearDisplay();
   display.setTextSize(1);               // Normal 1:1 pixel scale
   display.setTextColor(SSD1306_WHITE);  // Draw white text
@@ -259,15 +254,3 @@ void displayTextOnOLED(String text) {
   display.display();  // Show initial text
 }
 
-// given a Timezone object, UTC and a string description, convert and print local time with time zone
-void printDateTime(Timezone tz, time_t utc) {
-  char buf[40];
-  char m[4];            // temporary storage for month string (DateStrings.cpp uses shared buffer)
-  TimeChangeRule* tcr;  // pointer to the time change rule, use to get the TZ abbrev
-
-  time_t t = tz.toLocal(utc, &tcr);
-  strcpy(m, monthShortStr(month(t)));
-  sprintf(buf, "%.2d:%.2d:%.2d %s %.2d %s %d %s",
-          hour(t), minute(t), second(t), dayShortStr(weekday(t)), day(t), m, year(t), tcr->abbrev);
-  Serial.println(buf);
-}
