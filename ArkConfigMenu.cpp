@@ -91,7 +91,7 @@ short ArkConfigMenu::handleInput()
         // if we are navigating into menus
         if(_currentMenuIndex==INT_UNINITIALIZED || _currentSubMenuIndex==INT_UNINITIALIZED)
         {
-          int requestedMenuIndex = convertStringToInt(userInput);
+          int requestedMenuIndex = userInput.toInt();
 
           // if root menu is displayed but nothing is selected
           if(_currentMenuIndex == INT_UNINITIALIZED)
@@ -167,50 +167,9 @@ void ArkConfigMenu::displayNextInputPrompt()
 // Returns Configuration information
 char* ArkConfigMenu::getWifiSSID() { return _config.wifi.ssid; }
 char* ArkConfigMenu::getWifiPassword() { return _config.wifi.password; }
-short ArkConfigMenu::getUTCTimezone() { return _config.time.timezone; }
+short ArkConfigMenu::getTimezone() { return _config.time.timezone; }
 bool ArkConfigMenu::doesColonHaveToBlink() { return _config.font.colonBlink; }
 
-// ------------------------------------------------------------
-// Converts char to Int
-short ArkConfigMenu::convertCharToInt(char c)
-{
-  if(c=='0') return 0;
-  if(c=='1') return 1;
-  if(c=='2') return 2;
-  if(c=='3') return 3;
-  if(c=='4') return 4;
-  if(c=='5') return 5;
-  if(c=='6') return 6;
-  if(c=='7') return 7;
-  if(c=='8') return 8;  
-  if(c=='9') return 9;
-
-  return -1;
-}
-
-// ------------------------------------------------------------
-// Converts string to Int
-short ArkConfigMenu::convertStringToInt(String s)
-{
-  short result=0;
-  short numberMultiplier=1;
-  short posOrNeg = 1; // To deternine if number is positive (1) or negative (-1)
-  s.trim();
-  for(short i=0; i < s.length(); i++)
-  {
-    if(s[i] == '-')
-    {
-      posOrNeg = -1;
-    }
-    else if(s[i] != '+')
-    {
-      result = (result * numberMultiplier) + convertCharToInt(s[i]);
-      numberMultiplier *= 10;
-    }
-  }
-
-  return result * posOrNeg;
-}
 
 // ------------------------------------------------------------
 // Converts String into char*
@@ -345,7 +304,6 @@ short ArkConfigMenu::handleSubMenu(String lastUserInput)
     {
       Serial.println("== Time Config ==");
       Serial.print(" UTC Timezone: "); 
-      if(_config.time.timezone > 0) Serial.print("+");
       Serial.println(_config.time.timezone);
       // To display sub-menu again
       _currentSubMenuIndex = INT_UNINITIALIZED;
@@ -358,18 +316,19 @@ short ArkConfigMenu::handleSubMenu(String lastUserInput)
     {
       switch(_userInputStep)
       {
-        // We have to ask for UTC timezone
+        // We have to ask for a timezone
         case 0:
         {
-          setNextInputPrompt("Enter UTC timezone (ex: +1):", EXPECTED_INPUT_TYPE_PROMPT__INT);
+          // To make caller display timezone list
+          actionToReturn = SUB_MENU__TIME_CONFIG__SET;
+          setNextInputPrompt("Select Timezone:", EXPECTED_INPUT_TYPE_PROMPT__INT);
           break;
         }
-        // Info about UTC timezone has been given
+        // Info about timezone has been given
         case 1:
         {
-          _config.time.timezone = convertStringToInt(lastUserInput);
+          _config.time.timezone = lastUserInput.toInt();
           saveConfig();
-          actionToReturn = SUB_MENU__TIME_CONFIG__SET;
           // To display sub-menu again
           _currentSubMenuIndex = INT_UNINITIALIZED;
           break;
