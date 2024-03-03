@@ -11,12 +11,6 @@
 #include "NTPClient.h"
 #include "WiFiManager.h"
 
-// Fonts
-//#include "Fonts.h"
-
-// Timezone definitions
-#include "TimezoneDef.h"
-
 // Wifi Configuration
 #include "ArkConfigMenu.h"
 
@@ -58,7 +52,8 @@ void setup()
 {
   Serial.begin(115200);
 
-  configMenu.begin(allFonts);
+  // Init configuration menu
+  configMenu.begin(allFonts, timezoneList);
 
   // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
   if(!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) 
@@ -115,8 +110,6 @@ void loop()
   {
     // List available Wifi networks
     case SUB_MENU__WIFI_CONFIG__LIST_NETWORKS: { printWifiNetworks(); break; }
-    case SUB_MENU__TIME_CONFIG__SET: { printTimezoneList(); break; }
-    case SUB_MENU__TIME_CONFIG__VIEW: { printCurrentTimeZone(); break; }
   }
 
   // If wifi is connected
@@ -131,26 +124,6 @@ void loop()
   }
 }
 
-// Displays available timezone list
-void printTimezoneList()
-{
-  Serial.println("");
-  // Displays available timezones with their name
-  for(short tzIdx=TIMEZONE_AEDT_AEST; tzIdx<TIMEZONE_PDT_PST; tzIdx++)
-  {
-    Serial.print(" ["); Serial.print(tzIdx); Serial.print("] ");
-    Serial.println(timezoneList[tzIdx].name);
-  }
-  Serial.println("");
-}
-
-// Displays current timezone information
-void printCurrentTimeZone()
-{
-  Serial.print(" Current timezone: ");
-  Serial.println(timezoneList[configMenu.getTimezone()].name);
-  Serial.println("");
-}
 
 
 // Prints Wifi networks

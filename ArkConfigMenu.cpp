@@ -38,7 +38,7 @@ ArkConfigMenu::ArkConfigMenu()
 // Start the configuration
 // NOTE: we cannot do this inside class constructor because it won't be
 // able to correcly load configuration from Preferences
-void ArkConfigMenu::begin(FontInfos fontList[])
+void ArkConfigMenu::begin(FontInfos fontList[], TZDefinition timezoneList[])
 {
   Serial.begin(115200);
   while (!Serial) {
@@ -53,6 +53,7 @@ void ArkConfigMenu::begin(FontInfos fontList[])
 
   // Saving parameters
   _fontList = fontList;
+  _timezoneList = timezoneList;
 
   // We start by displaying the menu
   printCurrentMenu();
@@ -309,8 +310,8 @@ short ArkConfigMenu::handleSubMenu(String lastUserInput)
     case SUB_MENU__TIME_CONFIG__VIEW:
     {
       Serial.println("== Time config ==");
-      // Make caller to display timezone name
-      actionToReturn = SUB_MENU__TIME_CONFIG__VIEW;
+      Serial.print(" Current timezone: ");
+      Serial.println(_timezoneList[getTimezone()].name);
       // To display sub-menu again
       _currentSubMenuIndex = INT_UNINITIALIZED;
       break;
@@ -325,8 +326,14 @@ short ArkConfigMenu::handleSubMenu(String lastUserInput)
         // We have to ask for a timezone
         case 0:
         {
-          // To make caller display timezone list
-          actionToReturn = SUB_MENU__TIME_CONFIG__SET;
+          Serial.println("");
+          // Displays available timezones with their name
+          for(short tzIdx=TIMEZONE_AEDT_AEST; tzIdx<TIMEZONE_PDT_PST; tzIdx++)
+          {
+            Serial.print(" ["); Serial.print(tzIdx); Serial.print("] ");
+            Serial.println(_timezoneList[tzIdx].name);
+          }
+          Serial.println("");
           setNextInputPrompt("Select Timezone:", EXPECTED_INPUT_TYPE_PROMPT__INT);
           break;
         }
@@ -494,6 +501,7 @@ void ArkConfigMenu::loadConfig()
 
   // Font
   _config.font.colonBlink = prefs.getBool(CONFIG_OPTION__FONT__BLINKING_COLON);
+  _config.font.fontNo = prefs.getShort(CONFIG_OPTION__FONT__NO);
   prefs.end();
 
   _configFormatIsValid = true;
@@ -527,6 +535,7 @@ void ArkConfigMenu::saveConfig()
   prefs.putShort(CONFIG_OPTION__TIME__TIMEZONE, _config.time.timezone);
   // Font
   prefs.putBool(CONFIG_OPTION__FONT__BLINKING_COLON, _config.font.colonBlink);
+  prefs.putShort(CONFIG_OPTION__FONT__NO, _config.font.fontNo);
   prefs.end();
   // Because we saved it, config format is now valid again
   _configFormatIsValid = true;

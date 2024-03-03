@@ -5,6 +5,7 @@
 #include <Preferences.h>
 #include "Arduino.h"
 #include "Fonts.h"
+#include "TimezoneDef.h"
 
 #define ARK_CONFIG_VERSION 1
 
@@ -89,7 +90,7 @@ class ArkConfigMenu
   public:
     ArkConfigMenu();
 
-    void begin(FontInfos fontList[]);
+    void begin(FontInfos fontList[], TZDefinition timezoneList[]);
 
     short handleInput();
 
@@ -107,6 +108,7 @@ class ArkConfigMenu
     short _userInputStep; // What input we are expecting
     bool _configFormatIsValid;
     FontInfos* _fontList;
+    TZDefinition* _timezoneList;
 
     // To store configuration
     ArkConfig _config;
