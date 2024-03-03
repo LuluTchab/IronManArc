@@ -89,7 +89,7 @@ class ArkConfigMenu
   public:
     ArkConfigMenu();
 
-    void begin(FontInfo fontList[]);
+    void begin(FontInfos fontList[]);
 
     short handleInput();
 
@@ -106,7 +106,7 @@ class ArkConfigMenu
     bool _displayPrompt;
     short _userInputStep; // What input we are expecting
     bool _configFormatIsValid;
-    FontInfo* _fontList;
+    FontInfos* _fontList;
 
     // To store configuration
     ArkConfig _config;

@@ -117,8 +117,6 @@ void loop()
     case SUB_MENU__WIFI_CONFIG__LIST_NETWORKS: { printWifiNetworks(); break; }
     case SUB_MENU__TIME_CONFIG__SET: { printTimezoneList(); break; }
     case SUB_MENU__TIME_CONFIG__VIEW: { printCurrentTimeZone(); break; }
-    case SUB_MENU__FONT_CONFIG__VIEW: { printCurrentFont(); break; }
-    case SUB_MENU__FONT_CONFIG__SET_FONT: { printFontList(); break; }
   }
 
   // If wifi is connected
@@ -154,13 +152,6 @@ void printCurrentTimeZone()
   Serial.println("");
 }
 
-// Displays current font name
-void printCurrentFont()
-{
-  Serial.print(" Current font: "); 
-  Serial.println(allFonts[configMenu.getFontNo()].name);
-  Serial.println("");
-}
 
 // Prints Wifi networks
 void printWifiNetworks() 
@@ -183,18 +174,6 @@ void printWifiNetworks()
   Serial.println("");
 }
 
-// Displays available timezone list
-void printFontList()
-{
-  Serial.println("");
-  // Displays available timezones with their name
-  for(short i=0; i<NB_FONTS; i++)
-  {
-    Serial.print(" ["); Serial.print(i); Serial.print("] ");
-    Serial.println(allFonts[i].name);
-  }
-  Serial.println("");
-}
 
 // Update clock display on OLED
 void updateOLEDClockDisplay() 

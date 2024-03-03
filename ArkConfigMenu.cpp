@@ -38,7 +38,7 @@ ArkConfigMenu::ArkConfigMenu()
 // Start the configuration
 // NOTE: we cannot do this inside class constructor because it won't be
 // able to correcly load configuration from Preferences
-void ArkConfigMenu::begin(FontInfo fontList[])
+void ArkConfigMenu::begin(FontInfos fontList[])
 {
   Serial.begin(115200);
   while (!Serial) {
@@ -51,6 +51,7 @@ void ArkConfigMenu::begin(FontInfo fontList[])
   _nextExpectedInputTypePrompt = EXPECTED_INPUT_TYPE_PROMPT__INT;
   _nextInputPrompt = INPUT_PROMPT__CHOICE;
 
+  // Saving parameters
   _fontList = fontList;
 
   // We start by displaying the menu
@@ -394,8 +395,14 @@ short ArkConfigMenu::handleSubMenu(String lastUserInput)
         // We have to ask for a Font
         case 0:
         {
-          // To make caller display font list
-          actionToReturn = SUB_MENU__FONT_CONFIG__SET_FONT;
+          Serial.println("");
+          // Displays available timezones with their name
+          for(short i=0; i<NB_FONTS; i++)
+          {
+            Serial.print("["); Serial.print(i); Serial.print("] ");
+            Serial.println(_fontList[i].name);
+          }
+          Serial.println("");
           setNextInputPrompt("Select font:", EXPECTED_INPUT_TYPE_PROMPT__INT);
           break;
         }
