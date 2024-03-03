@@ -5,6 +5,7 @@
 #include <Preferences.h>
 #include "Arduino.h"
 
+
 #define ARK_CONFIG_VERSION 1
 
 // Root menu
@@ -92,7 +93,7 @@ class ArkConfigMenu
 
     char* getWifiSSID();
     char* getWifiPassword();
-    short getUTCTimezone();
+    short getTimezone();
     bool doesColonHaveToBlink();
 
   protected:
@@ -111,8 +112,6 @@ class ArkConfigMenu
     char* _subMenu[ROOT_MENU_SIZE][SUB_MENU_SIZE__WIFI];
 
     // Utilities
-    short convertCharToInt(char c);
-    short convertStringToInt(String s);
     void convertStringToCharArray(String text, char* output);
 
     void printCurrentMenu();

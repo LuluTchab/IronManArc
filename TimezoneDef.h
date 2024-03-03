@@ -1,3 +1,7 @@
+
+#ifndef TimezoneDef_h
+#define TimezoneDef_h
+
 // https://github.com/JChristensen/Timezone
 #include <Timezone.h>
 
@@ -69,4 +73,4 @@ TZDef timezoneList[] = {
   {"US Pacific Time Zone (Las Vegas, Los Angeles)", tzUsPT}
 };
 
-
+#endif

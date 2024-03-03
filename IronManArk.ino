@@ -1,21 +1,5 @@
 /**************************************************************************
- This is an example for our Monochrome OLEDs based on SSD1306 drivers
 
- Pick one up today in the adafruit shop!
- ------> http://www.adafruit.com/category/63_98
-
- This example is for a 128x32 pixel display using I2C to communicate
- 3 pins are required to interface (two I2C and one reset).
-
- Adafruit invests time and resources providing this open
- source code, please support Adafruit and open-source
- hardware by purchasing products from Adafruit!
-
- Written by Limor Fried/Ladyada for Adafruit Industries,
- with contributions from the open source community.
- BSD license, check license.txt for more information
- All text above, and the splash screen below must be
- included in any redistribution.
  **************************************************************************/
 
 #include <SPI.h>
@@ -76,9 +60,10 @@ void setup()
   configMenu.begin();
 
   // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
-  if (!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) {
+  if(!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) 
+  {
     Serial.println(F("SSD1306 allocation failed"));
-    for (;;)
+    for(;;)
       ;  // Don't proceed, loop forever
   }
 
@@ -86,9 +71,11 @@ void setup()
   displayStartupLogo();
 
   // If configuration is not valid
-  if (!configMenu.isConfigFormatValid()) {
+  if (!configMenu.isConfigFormatValid()) 
+  {
     displayTextOnOLED("Invalid config\nUse Serial port\nhttps://t.ly/sFklh");
-  } else  // Configuration is valid
+  }
+  else  // Configuration is valid
   {
 
     WiFi.begin(configMenu.getWifiSSID(), configMenu.getWifiPassword());
@@ -96,17 +83,19 @@ void setup()
     const int nbMsBetweenChecks = 500;
 
     // We try to connect for a nbMsLeftToTry milliseconds
-    while ((WiFi.status() != WL_CONNECTED) && (nbMsLeftToTry > 0)) {
+    while((WiFi.status() != WL_CONNECTED) && (nbMsLeftToTry > 0))
+    {
       delay(nbMsBetweenChecks);
       nbMsLeftToTry -= nbMsBetweenChecks;
     }
 
     // If we were able to connect on Wifi
-    if (nbMsLeftToTry > 0) {
+    if(nbMsLeftToTry > 0)
+    {
       timeClient.begin();
-      // Init timezone
-      timeClient.setTimeOffset(UTC_OFFSET_IN_SECONDS * configMenu.getUTCTimezone());
-    } else {
+    }
+    else
+    {
       displayTextOnOLED("Wifi connect error\nUse Serial port\nhttps://t.ly/sFklh");
     }
   }
@@ -132,14 +121,20 @@ void loop()
     // Set current UTC Timezone
     case SUB_MENU__TIME_CONFIG__SET:
       {
-        timeClient.setTimeOffset(UTC_OFFSET_IN_SECONDS * configMenu.getUTCTimezone());
+        // Displays available timezones with their name
+        for(short tzIdx=TIMEZONE_AEDT_AEST; tzIdx<TIMEZONE_PDT_PST; tzIdx++ )
+        {
+          Serial.print(" ["); Serial.print(tzIdx); Serial.print("] ");
+          Serial.println(timezoneList[tzIdx].name);
+        }
         break;
       }
   }
 
 
   // If wifi is connected
-  if (WiFi.status() == WL_CONNECTED) {
+  if (WiFi.status() == WL_CONNECTED) 
+  {
     // Update the time
     timeClient.update();
 
@@ -173,17 +168,17 @@ void printWifiNetworks()
 void updateClockDisplay() 
 {
   char timeStr[5];
-  time_t t = timezoneList[TIMEZONE_CET_CEST].tz.toLocal(timeClient.getEpochTime());
+  time_t t = timezoneList[configMenu.getTimezone()].tz.toLocal(timeClient.getEpochTime());
 
   int nextCharOffset = 0;  // offset for next character to draw
   int curOffset;           // x Offset to draw bitmaps
   char curChar;            // current character to draw
 
   // For colon anim between hours and minutes
-  if (second(t) != previousSeconds) 
+  if(second(t) != previousSeconds) 
   {
     previousSeconds = second(t);
-    if (configMenu.doesColonHaveToBlink()) 
+    if(configMenu.doesColonHaveToBlink()) 
     {
       colonDisplayed = !colonDisplayed;
     }
@@ -206,7 +201,7 @@ void updateClockDisplay()
     curOffset = nextCharOffset;
 
     // If we have to display char between hours and minutes
-    if (curChar == ':' || curChar == ' ') 
+    if(curChar == ':' || curChar == ' ') 
     {
       nextCharOffset += COLON_WIDTH;
       display.drawBitmap(curOffset, 0, avengerColonOrNot[(curChar == ' ') ? 0 : 1], COLON_WIDTH, SCREEN_HEIGHT, 1);
