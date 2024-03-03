@@ -1,18 +1,35 @@
 /**************************************************************************
 
  **************************************************************************/
-#include <typeinfo>
 #include <SPI.h>
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 // https://github.com/adafruit/Adafruit_SSD1306
 #include <Adafruit_SSD1306.h>
+#include "Adafruit_NeoPixel.h"
 #include "StartupLogo.h"
 #include "NTPClient.h"
 #include "WiFiManager.h"
 
 // Wifi Configuration
 #include "ArkConfigMenu.h"
+
+// Which pin on the Arduino is connected to the NeoPixels?
+#define LED_PIN        17
+// How many NeoPixels are attached to the Arduino?
+#define NB_LEDS 35
+
+int Display_backlight = 2; // Adjust it 0 to 7
+int led_ring_brightness = 60; // Adjust it 0 to 255
+int led_ring_brightness_flash = 250; // Adjust it 0 to 255
+
+#define LED_RED 51
+#define LED_GREEN 195
+#define LED_BLUE 247
+
+
+// When setting up the NeoPixel library, we tell it how many pixels,
+Adafruit_NeoPixel pixels(NB_LEDS, LED_PIN, NEO_GRB + NEO_KHZ800);
 
 
 // Define NTP Client to get time
@@ -44,6 +61,7 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 int previousSeconds;
 bool colonDisplayed;
+bool newHourFlashDone;
 
 // Configuration menu
 ArkConfigMenu configMenu;
@@ -51,6 +69,10 @@ ArkConfigMenu configMenu;
 void setup()
 {
   Serial.begin(115200);
+
+  // Init
+  colonDisplayed = true;
+  newHourFlashDone = false;
 
   // Init configuration menu
   configMenu.begin(WiFi, allFonts, timezoneList);
@@ -73,7 +95,7 @@ void setup()
   }
   else  // Configuration is valid
   {
-
+    // Connection on Wifi network
     WiFi.begin(configMenu.getWifiSSID(), configMenu.getWifiPassword());
     int nbMsLeftToTry = 3000;
     const int nbMsBetweenChecks = 500;
@@ -89,6 +111,18 @@ void setup()
     if(nbMsLeftToTry > 0)
     {
       timeClient.begin();
+
+      pixels.begin(); // INITIALIZE NeoPixel pixels object
+      pixels.setBrightness(led_ring_brightness);
+
+      for(int i=0; i<NB_LEDS;i++)
+      {
+        pixels.setPixelColor(i, pixels.Color(LED_RED, LED_GREEN, LED_BLUE));
+        pixels.show();
+        delay(50);
+      }
+
+      ledRingFlashCuckoo();// white flash
     }
     else
     {
@@ -96,13 +130,11 @@ void setup()
     }
   }
 
-  // Init
-  colonDisplayed = true;
 }
 
 void loop() 
 {
-
+  bool isNewHour;
   short actionToDo = configMenu.handleInput();
 
   // If wifi is connected
@@ -111,7 +143,20 @@ void loop()
     // Update the time
     timeClient.update();
 
-    updateOLEDClockDisplay();
+    ledRingNormalLight();
+
+    isNewHour = updateOLEDClockDisplay();
+
+    // Animation every hour
+    if(isNewHour && !newHourFlashDone)
+    {
+      newHourFlashDone = true;
+      ledRingFlashCuckoo();
+    }
+    if(!isNewHour && newHourFlashDone)
+    {
+      newHourFlashDone = false;
+    }
 
     delay(200);
   }
@@ -119,7 +164,8 @@ void loop()
 
 
 // Update clock display on OLED
-void updateOLEDClockDisplay() 
+// Returns true|false to tell if it's a new hour
+bool updateOLEDClockDisplay() 
 {
   char timeStr[5];
   // Get time in current defined timezone
@@ -172,6 +218,8 @@ void updateOLEDClockDisplay()
   }
 
   display.display();
+
+  return minute(currentTime)==0;
 }
 
 /*
@@ -204,5 +252,41 @@ void displayTextOnOLED(String text)
     display.write(char(text[i]));
   }
   display.display();  // Show initial text
+}
+
+
+void ledRingNormalLight(){
+
+  pixels.clear();
+  pixels.setBrightness(led_ring_brightness);
+  for(int i=0; i<NB_LEDS ; i++)
+  {
+    pixels.setPixelColor(i, pixels.Color(LED_RED, LED_GREEN, LED_BLUE));
+  }
+  pixels.show(); 
+}
+
+/*
+  LEDs flashes white to do a Cuckoo!
+*/
+void ledRingFlashCuckoo()
+{
+  // Set full brighness and almost white
+  pixels.setBrightness(led_ring_brightness_flash);
+  for(int i=0; i<NB_LEDS; i++)
+  {
+    pixels.setPixelColor(i, pixels.Color(250,250,250));
+  }
+  pixels.show();
+
+  // Fade out LEDs brightness to almost shutdown them
+  for (int i=led_ring_brightness_flash; i>10 ; i--)
+  {
+    pixels.setBrightness(i);
+    pixels.show();
+    delay(7);
+  }
+  // Display normal brightness again
+  ledRingNormalLight();
 }
 
