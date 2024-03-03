@@ -38,7 +38,7 @@ ArkConfigMenu::ArkConfigMenu()
 // Start the configuration
 // NOTE: we cannot do this inside class constructor because it won't be
 // able to correcly load configuration from Preferences
-void ArkConfigMenu::begin(FontInfos fontList[], TZDefinition timezoneList[])
+void ArkConfigMenu::begin(FontInfos fontList[], TimezoneInfos timezoneList[])
 {
   Serial.begin(115200);
   while (!Serial) {
@@ -173,8 +173,8 @@ void ArkConfigMenu::printNextInputPrompt()
 // Returns Configuration information
 char* ArkConfigMenu::getWifiSSID() { return _config.wifi.ssid; }
 char* ArkConfigMenu::getWifiPassword() { return _config.wifi.password; }
-short ArkConfigMenu::getTimezone() { return _config.time.timezone; }
-short ArkConfigMenu::getFontNo() { return _config.font.fontNo; }
+TimezoneInfos ArkConfigMenu::getTimezoneInfos() { return _timezoneList[_config.time.timezone]; }
+FontInfos ArkConfigMenu::getFontInfos() { return _fontList[_config.font.fontNo]; }
 bool ArkConfigMenu::doesColonHaveToBlink() { return _config.font.colonBlink; }
 
 
@@ -311,7 +311,7 @@ short ArkConfigMenu::handleSubMenu(String lastUserInput)
     {
       Serial.println("== Time config ==");
       Serial.print(" Current timezone: ");
-      Serial.println(_timezoneList[getTimezone()].name);
+      Serial.println(getTimezoneInfos().name);
       // To display sub-menu again
       _currentSubMenuIndex = INT_UNINITIALIZED;
       break;
@@ -360,8 +360,7 @@ short ArkConfigMenu::handleSubMenu(String lastUserInput)
     {
       Serial.println("== Font config ==");
       Serial.print(" Is colon blinking? "); Serial.println((doesColonHaveToBlink())?"Yes":"No");
-      Serial.print(" Current font: "); Serial.println(_fontList[getFontNo()].name);
-      Serial.println("");
+      Serial.print(" Current font: "); Serial.println(getFontInfos().name);
       // To display sub-menu again
       _currentSubMenuIndex = INT_UNINITIALIZED;
       break;

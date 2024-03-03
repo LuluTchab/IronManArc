@@ -90,7 +90,7 @@ class ArkConfigMenu
   public:
     ArkConfigMenu();
 
-    void begin(FontInfos fontList[], TZDefinition timezoneList[]);
+    void begin(FontInfos fontList[], TimezoneInfos timezoneList[]);
 
     short handleInput();
 
@@ -98,8 +98,8 @@ class ArkConfigMenu
 
     char* getWifiSSID();
     char* getWifiPassword();
-    short getTimezone();
-    short getFontNo();
+    TimezoneInfos getTimezoneInfos();
+    FontInfos getFontInfos();
     bool doesColonHaveToBlink();
 
   protected:
@@ -108,7 +108,7 @@ class ArkConfigMenu
     short _userInputStep; // What input we are expecting
     bool _configFormatIsValid;
     FontInfos* _fontList;
-    TZDefinition* _timezoneList;
+    TimezoneInfos* _timezoneList;
 
     // To store configuration
     ArkConfig _config;

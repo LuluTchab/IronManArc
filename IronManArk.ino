@@ -153,16 +153,16 @@ void updateOLEDClockDisplay()
 {
   char timeStr[5];
   // Get time in current defined timezone
-  time_t t = timezoneList[configMenu.getTimezone()].tz.toLocal(timeClient.getEpochTime());
+  time_t currentTime = configMenu.getTimezoneInfos().timezone.toLocal(timeClient.getEpochTime());
 
   int nextCharOffset = 0;  // offset for next character to draw
   int curOffset;           // x Offset to draw bitmaps
   char curChar;            // current character to draw
 
   // For colon anim between hours and minutes
-  if(second(t) != previousSeconds) 
+  if(second(currentTime) != previousSeconds) 
   {
-    previousSeconds = second(t);
+    previousSeconds = second(currentTime);
     if(configMenu.doesColonHaveToBlink()) 
     {
       colonDisplayed = !colonDisplayed;
@@ -174,7 +174,7 @@ void updateOLEDClockDisplay()
     }
   }
   // defining string to display
-  sprintf(timeStr, "%.2d%s%.2d", hour(t), ((colonDisplayed) ? ":" : " "), minute(t));
+  sprintf(timeStr, "%.2d%s%.2d", hour(currentTime), ((colonDisplayed) ? ":" : " "), minute(currentTime));
 
   // Displaying time
   display.clearDisplay();
@@ -189,14 +189,14 @@ void updateOLEDClockDisplay()
     if(curChar == ':' || curChar == ' ') 
     {
       nextCharOffset += COLON_WIDTH;
-      display.drawBitmap(curOffset, 0, allFonts[configMenu.getFontNo()].colonOrNot[(curChar == ' ') ? withoutColon : withColon], COLON_WIDTH, SCREEN_HEIGHT, 1);
+      display.drawBitmap(curOffset, 0, configMenu.getFontInfos().colonOrNot[(curChar == ' ') ? withoutColon : withColon], COLON_WIDTH, SCREEN_HEIGHT, 1);
     } 
     else  // we have to display a digit
     {
       nextCharOffset += DIGIT_WIDTH;
       // Displaying digit by pointing on it in 'all digits bitmap array' by it index (corresponding to the number we have to display. number 0 => index 0 in array)
       //display.drawBitmap(curOffset, 0, allAvengerDigits[String(timeStr[i]).toInt()], DIGIT_WIDTH, SCREEN_HEIGHT, 1);
-      display.drawBitmap(curOffset, 0, allFonts[configMenu.getFontNo()].allDigits[String(timeStr[i]).toInt()], DIGIT_WIDTH, SCREEN_HEIGHT, 1);
+      display.drawBitmap(curOffset, 0, configMenu.getFontInfos().allDigits[String(timeStr[i]).toInt()], DIGIT_WIDTH, SCREEN_HEIGHT, 1);
       
     }
   }

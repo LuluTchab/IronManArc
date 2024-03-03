@@ -48,7 +48,7 @@ TimeChangeRule usPDT = {"PDT", Second, Sun, Mar, 2, -420};
 TimeChangeRule usPST = {"PST", First, Sun, Nov, 2, -480};
 Timezone tzUsPT(usPDT, usPST);
 
-TZDefinition timezoneList[] = {
+TimezoneInfos timezoneList[] = {
   {"Australia Eastern Time Zone (Sydney, Melbourne)", tzAusET},
   {"Moscow Standard Time", tzMSK},
   {"Central European Time (Frankfurt, Paris)", tzCE},
