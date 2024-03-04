@@ -15,7 +15,7 @@ struct FontInfos
   const unsigned char** colonOrNot;
 };
 
-#define NB_FONTS 2
+#define NB_FONTS 3
 
 // Liste of available fonts
 extern FontInfos allFonts[NB_FONTS];

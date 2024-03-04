@@ -15,7 +15,10 @@
 #include "ArkConfigMenu.h"
 
 // Which pin on the Arduino is connected to the NeoPixels?
-#define LED_PIN        17
+#define LED_PIN 17
+// Blue standard LEDs
+#define BLUE_LED_1_PIN 25
+#define BLUE_LED_2_PIN 26
 // How many NeoPixels are attached to the Arduino?
 #define NB_LEDS 35
 
@@ -123,6 +126,10 @@ void setup()
       }
 
       ledRingFlashCuckoo();// white flash
+
+      // switch on the blue leds
+      digitalWrite(BLUE_LED_1_PIN,1);
+      digitalWrite(BLUE_LED_2_PIN,1);
     }
     else
     {
