@@ -495,6 +495,15 @@ short ArkConfigMenu::getCurrentSubMenuSize()
 
 
 // ------------------------------------------------------------
+// Toggle font
+void ArkConfigMenu::toggleFont()
+{
+  _config.font.fontNo = (_config.font.fontNo+1) % NB_FONTS;
+  saveConfig();
+}
+
+
+// ------------------------------------------------------------
 // Load configuration from Preferences
 void ArkConfigMenu::loadConfig()
 {

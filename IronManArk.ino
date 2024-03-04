@@ -30,6 +30,8 @@ int led_ring_brightness_flash = 250; // Adjust it 0 to 255
 #define LED_GREEN 195
 #define LED_BLUE 247
 
+#define TOUCH_SENSOR_PIN 23
+
 
 // When setting up the NeoPixel library, we tell it how many pixels,
 Adafruit_NeoPixel pixels(NB_LEDS, LED_PIN, NEO_GRB + NEO_KHZ800);
@@ -130,6 +132,10 @@ void setup()
       // switch on the blue leds
       digitalWrite(BLUE_LED_1_PIN,1);
       digitalWrite(BLUE_LED_2_PIN,1);
+
+      // Touch to toggle font
+      pinMode(TOUCH_SENSOR_PIN, INPUT);
+      attachInterrupt(digitalPinToInterrupt(TOUCH_SENSOR_PIN), toggleFont, RISING);
     }
     else
     {
@@ -295,5 +301,13 @@ void ledRingFlashCuckoo()
   }
   // Display normal brightness again
   ledRingNormalLight();
+}
+
+/*
+  Select next font
+*/
+void toggleFont()
+{
+  configMenu.toggleFont();
 }
 

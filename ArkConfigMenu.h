@@ -106,6 +106,8 @@ class ArkConfigMenu
     FontInfos getFontInfos();
     bool doesColonHaveToBlink();
 
+    void toggleFont();
+
   protected:
     short _currentMenuIndex, _currentSubMenuIndex;
     bool _displayPrompt;
