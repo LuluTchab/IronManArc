@@ -11,7 +11,7 @@
 #include "NTPClient.h"
 #include "WiFiManager.h"
 
-// Wifi Configuration
+// Ark Configuration
 #include "ArkConfigMenu.h"
 
 // Which pin on the Arduino is connected to the NeoPixels?
@@ -26,12 +26,11 @@ int Display_backlight = 2; // Adjust it 0 to 7
 int led_ring_brightness = 60; // Adjust it 0 to 255
 int led_ring_brightness_flash = 250; // Adjust it 0 to 255
 
-#define LED_RED 51
-#define LED_GREEN 195
-#define LED_BLUE 247
+#define LED_RED 51 //51
+#define LED_GREEN  226 //219
+#define LED_BLUE 254 //255
 
 #define TOUCH_SENSOR_PIN 23
-
 
 // When setting up the NeoPixel library, we tell it how many pixels,
 Adafruit_NeoPixel pixels(NB_LEDS, LED_PIN, NEO_GRB + NEO_KHZ800);
