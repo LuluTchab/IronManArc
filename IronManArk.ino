@@ -67,6 +67,7 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 int previousSeconds;
 bool colonDisplayed;
 bool newHourFlashDone;
+bool togglingFont;
 
 // Configuration menu
 ArkConfigMenu configMenu;
@@ -104,6 +105,7 @@ void setup()
     WiFi.begin(configMenu.getWifiSSID(), configMenu.getWifiPassword());
     int nbMsLeftToTry = 3000;
     const int nbMsBetweenChecks = 500;
+    togglingFont = false;
 
     // We try to connect for a nbMsLeftToTry milliseconds
     while((WiFi.status() != WL_CONNECTED) && (nbMsLeftToTry > 0))
@@ -135,12 +137,12 @@ void setup()
 
       // Touch to toggle font
       pinMode(TOUCH_SENSOR_PIN, INPUT);
-      attachInterrupt(digitalPinToInterrupt(TOUCH_SENSOR_PIN), toggleFont, RISING);
     }
     else
     {
       displayTextOnOLED("Wifi connect error\nUse Serial port\nhttps://t.ly/sFklh");
     }
+
   }
 
 }
@@ -169,6 +171,17 @@ void loop()
     if(!isNewHour && newHourFlashDone)
     {
       newHourFlashDone = false;
+    }
+
+    // If toggle font has been requested and we're not currently toggling font..
+    if(digitalRead(TOUCH_SENSOR_PIN)==HIGH && !togglingFont)
+    {
+      togglingFont = true;
+      configMenu.toggleFont();
+    }
+    if(digitalRead(TOUCH_SENSOR_PIN)==LOW)
+    {
+      togglingFont = false;
     }
 
     delay(200);
@@ -301,13 +314,5 @@ void ledRingFlashCuckoo()
   }
   // Display normal brightness again
   ledRingNormalLight();
-}
-
-/*
-  Select next font
-*/
-void toggleFont()
-{
-  configMenu.toggleFont();
 }
 
