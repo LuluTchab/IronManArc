@@ -132,8 +132,11 @@ void setup()
       ledRingFlashCuckoo();// white flash
 
       // switch on the blue leds
-      digitalWrite(BLUE_LED_1_PIN,1);
-      digitalWrite(BLUE_LED_2_PIN,1);
+      pinMode(BLUE_LED_1_PIN, OUTPUT);
+      digitalWrite(BLUE_LED_1_PIN, HIGH);
+
+      pinMode(BLUE_LED_2_PIN, OUTPUT);
+      digitalWrite(BLUE_LED_2_PIN, HIGH);
 
       // Touch to toggle font
       pinMode(TOUCH_SENSOR_PIN, INPUT);
