@@ -59,6 +59,7 @@
 #define CONFIG_OPTION__FONT__BLINKING_COLON "fontBlkColon"
 #define CONFIG_OPTION__FONT__NO "fontNo"
 
+// Supported wifi types
 #define WIFI_TYPE__HOME 0
 #define WIFI_TYPE__ENTERPRISE 1
 

@@ -243,6 +243,7 @@ short ArkConfigMenu::handleSubMenu(String lastUserInput)
       if(_configFormatIsValid)
       {
         Serial.println("== Wifi config ==");
+        Serial.printf(" Type: %s\n", ((getWifiType()==WIFI_TYPE__HOME)?"Home":"Enterprise"));
         Serial.printf(" SSID: %s\n", getWifiSSID());
       }
       else
@@ -287,7 +288,7 @@ short ArkConfigMenu::handleSubMenu(String lastUserInput)
         // We have to ask for Wifi Type
         case 0:
         {
-          Serial.printf("\n[%d] Home\n[%d] Enterprise\n", WIFI_TYPE__HOME, WIFI_TYPE__ENTERPRISE);
+          Serial.printf("\n[%d] Home (SSID, Password)\n[%d] Enterprise (SSID, Username, Password)\n", WIFI_TYPE__HOME, WIFI_TYPE__ENTERPRISE);
           setNextInputPrompt("Select Wifi Type", EXPECTED_INPUT_TYPE_PROMPT__STRING);
           break;
         }
