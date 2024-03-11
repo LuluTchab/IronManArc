@@ -17,7 +17,7 @@ ArkConfigMenu::ArkConfigMenu()
   _subMenu[ROOT_MENU_INDEX__WIFI_CONFIG][SUB_MENU__BACK] = "Back";
   _subMenu[ROOT_MENU_INDEX__WIFI_CONFIG][getSubMenuIndexFromId(ROOT_MENU_INDEX__WIFI_CONFIG, SUB_MENU__WIFI_CONFIG__VIEW)] = "View current config";
   _subMenu[ROOT_MENU_INDEX__WIFI_CONFIG][getSubMenuIndexFromId(ROOT_MENU_INDEX__WIFI_CONFIG, SUB_MENU__WIFI_CONFIG__LIST_NETWORKS)] = "List available networks";
-  _subMenu[ROOT_MENU_INDEX__WIFI_CONFIG][getSubMenuIndexFromId(ROOT_MENU_INDEX__WIFI_CONFIG, SUB_MENU__WIFI_CONFIG__SET)] = "Set SSID/Password";
+  _subMenu[ROOT_MENU_INDEX__WIFI_CONFIG][getSubMenuIndexFromId(ROOT_MENU_INDEX__WIFI_CONFIG, SUB_MENU__WIFI_CONFIG__SET)] = "Set Wifi config";
   
   // - Time
   _menu[ROOT_MENU_INDEX__TIME_CONFIG] = "Time config";
@@ -172,7 +172,9 @@ void ArkConfigMenu::printNextInputPrompt()
 
 // ------------------------------------------------------------
 // Returns Configuration information
+short ArkConfigMenu::getWifiType() { return _config.wifi.type; }
 char* ArkConfigMenu::getWifiSSID() { return _config.wifi.ssid; }
+char* ArkConfigMenu::getWifiUsername() { return _config.wifi.username; }
 char* ArkConfigMenu::getWifiPassword() { return _config.wifi.password; }
 TimezoneInfos ArkConfigMenu::getTimezoneInfos() { return _timezoneList[_config.time.timezone]; }
 FontInfos ArkConfigMenu::getFontInfos() { return _fontList[_config.font.fontNo]; }
@@ -241,6 +243,7 @@ short ArkConfigMenu::handleSubMenu(String lastUserInput)
       if(_configFormatIsValid)
       {
         Serial.println("== Wifi config ==");
+        Serial.printf(" Type: %s\n", ((getWifiType()==WIFI_TYPE__HOME)?"Home":"Enterprise"));
         Serial.printf(" SSID: %s\n", getWifiSSID());
       }
       else
@@ -282,22 +285,52 @@ short ArkConfigMenu::handleSubMenu(String lastUserInput)
     {
       switch(_userInputStep)
       {
-        // We have to ask for Wifi SSID
+        // We have to ask for Wifi Type
         case 0:
         {
+          Serial.printf("\n[%d] Home (SSID, Password)\n[%d] Enterprise (SSID, Username, Password)\n", WIFI_TYPE__HOME, WIFI_TYPE__ENTERPRISE);
+          setNextInputPrompt("Select Wifi Type", EXPECTED_INPUT_TYPE_PROMPT__STRING);
+          break;
+        }
+        // We have to ask for Wifi SSID
+        case 1:
+        {
+          _config.wifi.type = lastUserInput.toInt();
           setNextInputPrompt("Enter Wifi SSID", EXPECTED_INPUT_TYPE_PROMPT__STRING);
           break;
         }
-        // We have to ask for Wifi Password
-        case 1:
+        // We have to ask for Wifi Username (enterprise only)
+        case 2:
         {
           // Saving Wifi SSID that was just given
           lastUserInput.toCharArray(_config.wifi.ssid, lastUserInput.length()+1);
+          // If we have to ask for username
+          if(getWifiType()==WIFI_TYPE__ENTERPRISE)
+          {
+            setNextInputPrompt("Enter Wifi Username (user@domain)", EXPECTED_INPUT_TYPE_PROMPT__PASSWORD);
+            break;
+          }
+          else
+          {
+            /* because there's no "break", we will directly go into next "case" but we have
+            to increment "_userInputStep" otherwise we will go twice into "Wifi password" input */
+            _userInputStep++;
+          }
+          
+        }
+        // We have to ask for Wifi Password
+        case 3:
+        {
+          if(getWifiType()==WIFI_TYPE__ENTERPRISE)
+          {
+            // Saving Wifi Username that was just given
+            lastUserInput.toCharArray(_config.wifi.username, lastUserInput.length()+1);
+          }
           setNextInputPrompt("Enter Wifi Password", EXPECTED_INPUT_TYPE_PROMPT__PASSWORD);
           break;
         }
-        // Both SSID and password were given
-        case 2:
+        // All wifi info were given
+        case 4:
         {
           // Saving Wifi Password that was just given
           lastUserInput.toCharArray(_config.wifi.password, lastUserInput.length()+1);
@@ -512,8 +545,10 @@ void ArkConfigMenu::loadConfig()
   prefs.begin(CONFIG_NAMESPACE, true);
   _config.version = prefs.getShort(CONFIG_OPTION__CONFIG_VERSION, INT_UNINITIALIZED);
   // Wifi
+  _config.wifi.type = prefs.getShort(CONFIG_OPTION__WIFI__TYPE, INT_UNINITIALIZED);
   convertStringToCharArray(prefs.getString(CONFIG_OPTION__WIFI__SSID, STRING_UNINITIALIZED), _config.wifi.ssid);
   convertStringToCharArray(prefs.getString(CONFIG_OPTION__WIFI__PASSWORD, STRING_UNINITIALIZED), _config.wifi.password);
+  convertStringToCharArray(prefs.getString(CONFIG_OPTION__WIFI__USERNAME, STRING_UNINITIALIZED), _config.wifi.username);
   
   // Time
   _config.time.timezone = prefs.getShort(CONFIG_OPTION__TIME__TIMEZONE);
@@ -521,7 +556,7 @@ void ArkConfigMenu::loadConfig()
   // Font
   _config.font.colonBlink = prefs.getBool(CONFIG_OPTION__FONT__BLINKING_COLON);
   _config.font.fontNo = prefs.getShort(CONFIG_OPTION__FONT__NO);
-  prefs.end();
+  
 
   _configFormatIsValid = true;
   // If equals to 0, it means that we don't have information about that
@@ -533,9 +568,12 @@ void ArkConfigMenu::loadConfig()
   // If stored configuration version is different than the current one
   if(_config.version != ARK_CONFIG_VERSION)
   {
-    // TODO: handle in the future
     _configFormatIsValid = false;
+    // Delete current preferences
+    prefs.clear();    
   }
+
+  prefs.end();
 }
 
 
@@ -548,8 +586,10 @@ void ArkConfigMenu::saveConfig()
 
   prefs.putShort(CONFIG_OPTION__CONFIG_VERSION, ARK_CONFIG_VERSION);
   // Wifi
+  prefs.putShort(CONFIG_OPTION__WIFI__TYPE, _config.wifi.type);
   prefs.putString(CONFIG_OPTION__WIFI__SSID, _config.wifi.ssid);
   prefs.putString(CONFIG_OPTION__WIFI__PASSWORD, _config.wifi.password);
+  prefs.putString(CONFIG_OPTION__WIFI__USERNAME, _config.wifi.username);
   // Time
   prefs.putShort(CONFIG_OPTION__TIME__TIMEZONE, _config.time.timezone);
   // Font
