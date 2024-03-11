@@ -8,7 +8,8 @@
 #include "Adafruit_NeoPixel.h" // https://github.com/adafruit/Adafruit_NeoPixel
 #include "StartupLogo.h"
 #include "NTPClient.h" // https://github.com/arduino-libraries/NTPClient
-#include "WiFiManager.h" // https://github.com/tzapu/WiFiManager
+#include <WiFi.h>
+#include "esp_wpa2.h" //wpa2 library for connections to Enterprise networks
 
 // Ark Configuration
 #include "ArkConfigMenu.h"
@@ -98,8 +99,16 @@ void setup()
   }
   else  // Configuration is valid
   {
-    // Connection on Wifi network
-    WiFi.begin(configMenu.getWifiSSID(), configMenu.getWifiPassword());
+    if(configMenu.getWifiType() == WIFI_TYPE__HOME)
+    {
+      // Connection on Wifi network
+      WiFi.begin(configMenu.getWifiSSID(), configMenu.getWifiPassword());
+    }
+    else // Enterprise
+    {
+      WiFi.begin(configMenu.getWifiSSID(), WPA2_AUTH_PEAP, configMenu.getWifiUsername(), configMenu.getWifiUsername(), configMenu.getWifiPassword()); // without CERTIFICATE, RADIUS server EXCEPTION "for old devices" required
+    }
+    
     int nbMsLeftToTry = 3000;
     const int nbMsBetweenChecks = 500;
     togglingFont = false;
