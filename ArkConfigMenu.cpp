@@ -17,7 +17,7 @@ ArkConfigMenu::ArkConfigMenu()
   _subMenu[ROOT_MENU_INDEX__WIFI_CONFIG][SUB_MENU__BACK] = "Back";
   _subMenu[ROOT_MENU_INDEX__WIFI_CONFIG][getSubMenuIndexFromId(ROOT_MENU_INDEX__WIFI_CONFIG, SUB_MENU__WIFI_CONFIG__VIEW)] = "View current config";
   _subMenu[ROOT_MENU_INDEX__WIFI_CONFIG][getSubMenuIndexFromId(ROOT_MENU_INDEX__WIFI_CONFIG, SUB_MENU__WIFI_CONFIG__LIST_NETWORKS)] = "List available networks";
-  _subMenu[ROOT_MENU_INDEX__WIFI_CONFIG][getSubMenuIndexFromId(ROOT_MENU_INDEX__WIFI_CONFIG, SUB_MENU__WIFI_CONFIG__SET)] = "Set SSID/Password";
+  _subMenu[ROOT_MENU_INDEX__WIFI_CONFIG][getSubMenuIndexFromId(ROOT_MENU_INDEX__WIFI_CONFIG, SUB_MENU__WIFI_CONFIG__SET)] = "Set Wifi config";
   
   // - Time
   _menu[ROOT_MENU_INDEX__TIME_CONFIG] = "Time config";
@@ -284,22 +284,52 @@ short ArkConfigMenu::handleSubMenu(String lastUserInput)
     {
       switch(_userInputStep)
       {
-        // We have to ask for Wifi SSID
+        // We have to ask for Wifi Type
         case 0:
         {
+          Serial.printf("\n[%d] Home\n[%d] Enterprise\n", WIFI_TYPE__HOME, WIFI_TYPE__ENTERPRISE);
+          setNextInputPrompt("Select Wifi Type", EXPECTED_INPUT_TYPE_PROMPT__STRING);
+          break;
+        }
+        // We have to ask for Wifi SSID
+        case 1:
+        {
+          _config.wifi.type = lastUserInput.toInt();
           setNextInputPrompt("Enter Wifi SSID", EXPECTED_INPUT_TYPE_PROMPT__STRING);
           break;
         }
-        // We have to ask for Wifi Password
-        case 1:
+        // We have to ask for Wifi Username (enterprise only)
+        case 2:
         {
           // Saving Wifi SSID that was just given
           lastUserInput.toCharArray(_config.wifi.ssid, lastUserInput.length()+1);
+          // If we have to ask for username
+          if(getWifiType()==WIFI_TYPE__ENTERPRISE)
+          {
+            setNextInputPrompt("Enter Wifi Username (user@domain)", EXPECTED_INPUT_TYPE_PROMPT__PASSWORD);
+            break;
+          }
+          else
+          {
+            /* because there's no "break", we will directly go into next "case" but we have
+            to increment "_userInputStep" otherwise we will go twice into "Wifi password" input */
+            _userInputStep++;
+          }
+          
+        }
+        // We have to ask for Wifi Password
+        case 3:
+        {
+          if(getWifiType()==WIFI_TYPE__ENTERPRISE)
+          {
+            // Saving Wifi Username that was just given
+            lastUserInput.toCharArray(_config.wifi.username, lastUserInput.length()+1);
+          }
           setNextInputPrompt("Enter Wifi Password", EXPECTED_INPUT_TYPE_PROMPT__PASSWORD);
           break;
         }
-        // Both SSID and password were given
-        case 2:
+        // All wifi info were given
+        case 4:
         {
           // Saving Wifi Password that was just given
           lastUserInput.toCharArray(_config.wifi.password, lastUserInput.length()+1);
