@@ -14,26 +14,48 @@
 // Ark Configuration
 #include "ArkConfigMenu.h"
 
+//////////////////////
+
+// Comment following line if you want to use enhanced version with WS2812 RGB LEDS
+// for Ark middle light
+//#define USE_BASIC_LEDS
+
+//////////////////////
+
 // Which pin on the Arduino is connected to the NeoPixels?
-#define LED_PIN 17
-// Blue standard LEDs
-#define BLUE_LED_1_PIN 25
-#define BLUE_LED_2_PIN 26
+#define LED_RING_PIN 17
 // How many NeoPixels are attached to the Arduino?
-#define NB_LEDS 35
+#define LED_RING_NB_LEDS 35
 
-int Display_backlight = 2; // Adjust it 0 to 7
-int led_ring_brightness = 60; // Adjust it 0 to 255
-int led_ring_brightness_flash = 250; // Adjust it 0 to 255
-
-#define LED_RED 51 //51
-#define LED_GREEN  226 //219
-#define LED_BLUE 254 //255
-
-#define TOUCH_SENSOR_PIN 23
+// LED Ring color
+#define LED_RING_RED 51 //51
+#define LED_RING_GREEN  226 //219
+#define LED_RING_BLUE 254 //255
 
 // When setting up the NeoPixel library, we tell it how many pixels,
-Adafruit_NeoPixel pixels(NB_LEDS, LED_PIN, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel ledRing(LED_RING_NB_LEDS, LED_RING_PIN, NEO_GRB + NEO_KHZ800);
+
+
+// if we have to use BASIC BLUE LEDs
+#ifdef USE_BASIC_LEDS
+  
+  // Blue standard LEDs
+  #define BLUE_LED_1_PIN 25
+  #define BLUE_LED_2_PIN 26
+
+#else // Use WS2812 RGB LEDs
+
+  #define CENTER_LEDS_PIN 27
+  #define CENTER_LEDS_NB_LEDS 2
+  Adafruit_NeoPixel centerLeds(CENTER_LEDS_NB_LEDS, CENTER_LEDS_PIN, NEO_GRB + NEO_KHZ800);
+
+#endif
+
+#define LED_NORMAL_BRIGHTNESS 60 // Adjust it 0 to 255
+#define LED_FLASH_BRIGHTNESS 250 // Adjust it 0 to 255
+
+
+#define TOUCH_SENSOR_PIN 23
 
 
 // Define NTP Client to get time
@@ -113,29 +135,42 @@ void setup()
       nbMsLeftToTry -= nbMsBetweenChecks;
     }
 
-    // If we were able to connect on Wifi
+    // If we were able to connect on Wifi138
     if(nbMsLeftToTry > 0)
     {
       timeClient.begin();
 
-      pixels.begin(); // INITIALIZE NeoPixel pixels object
-      pixels.setBrightness(led_ring_brightness);
+      ledRing.begin(); // INITIALIZE NeoPixel pixels object
+      ledRing.setBrightness(LED_NORMAL_BRIGHTNESS);
 
-      for(int i=0; i<NB_LEDS;i++)
+      for(int i=0; i<LED_RING_NB_LEDS;i++)
       {
-        pixels.setPixelColor(i, pixels.Color(LED_RED, LED_GREEN, LED_BLUE));
-        pixels.show();
+        ledRing.setPixelColor(i, ledRing.Color(LED_RING_RED, LED_RING_GREEN, LED_RING_BLUE));
+        ledRing.show();
         delay(50);
       }
 
       ledRingFlashCuckoo();// white flash
 
-      // switch on the blue leds
-      pinMode(BLUE_LED_1_PIN, OUTPUT);
-      digitalWrite(BLUE_LED_1_PIN, HIGH);
+      // --- BASIC LEDS
+      #ifdef USE_BASIC_LEDS
+        // switch ON the blue leds
+        pinMode(BLUE_LED_1_PIN, OUTPUT);
+        digitalWrite(BLUE_LED_1_PIN, HIGH);
 
-      pinMode(BLUE_LED_2_PIN, OUTPUT);
-      digitalWrite(BLUE_LED_2_PIN, HIGH);
+        pinMode(BLUE_LED_2_PIN, OUTPUT);
+        digitalWrite(BLUE_LED_2_PIN, HIGH);
+
+      #else  // --- WS2812
+
+        centerLeds.begin();
+        for(int i=0; i<CENTER_LEDS_NB_LEDS;i++)
+        {
+          centerLeds.setPixelColor(i, centerLeds.Color(LED_RING_RED, LED_RING_GREEN, LED_RING_BLUE));
+        }
+        centerLeds.show();
+
+      #endif // ---
 
       // Touch to toggle font
       pinMode(TOUCH_SENSOR_PIN, INPUT);
@@ -160,7 +195,7 @@ void loop()
     // Update the time
     timeClient.update();
 
-    ledRingNormalLight();
+    ledNormalLight();
 
     isNewHour = updateOLEDClockDisplay();
 
@@ -188,6 +223,7 @@ void loop()
 
     delay(200);
   }
+
 }
 
 
@@ -283,15 +319,28 @@ void displayTextOnOLED(String text)
 }
 
 
-void ledRingNormalLight(){
+void ledNormalLight(){
 
-  pixels.clear();
-  pixels.setBrightness(led_ring_brightness);
-  for(int i=0; i<NB_LEDS ; i++)
+  ledRing.clear();
+  ledRing.setBrightness(LED_NORMAL_BRIGHTNESS);
+  for(int i=0; i<LED_RING_NB_LEDS ; i++)
   {
-    pixels.setPixelColor(i, pixels.Color(LED_RED, LED_GREEN, LED_BLUE));
+    ledRing.setPixelColor(i, ledRing.Color(LED_RING_RED, LED_RING_GREEN, LED_RING_BLUE));
   }
-  pixels.show(); 
+
+  // --- WS2812 Center LEDS
+  #ifndef USE_BASIC_LEDS
+    centerLeds.clear();
+    centerLeds.setBrightness(LED_NORMAL_BRIGHTNESS);
+    for(int i=0; i<CENTER_LEDS_NB_LEDS;i++)
+    {
+      centerLeds.setPixelColor(i, centerLeds.Color(LED_RING_RED, LED_RING_GREEN, LED_RING_BLUE));
+    }
+    centerLeds.show();
+  #endif
+
+  ledRing.show();
+
 }
 
 /*
@@ -300,21 +349,38 @@ void ledRingNormalLight(){
 void ledRingFlashCuckoo()
 {
   // Set full brighness and almost white
-  pixels.setBrightness(led_ring_brightness_flash);
-  for(int i=0; i<NB_LEDS; i++)
+  ledRing.setBrightness(LED_FLASH_BRIGHTNESS);
+  for(int i=0; i<LED_RING_NB_LEDS; i++)
   {
-    pixels.setPixelColor(i, pixels.Color(250,250,250));
+    ledRing.setPixelColor(i, ledRing.Color(250,250,250));
   }
-  pixels.show();
+  
+  // --- WS2812 Center LEDS
+  #ifndef USE_BASIC_LEDS
+    for(int i=0; i<CENTER_LEDS_NB_LEDS;i++)
+    {
+      centerLeds.setPixelColor(i, centerLeds.Color(250, 250, 250));
+    }
+    centerLeds.show();
+  #endif
+
+  ledRing.show();
 
   // Fade out LEDs brightness to almost shutdown them
-  for (int i=led_ring_brightness_flash; i>10 ; i--)
+  for (int i=LED_FLASH_BRIGHTNESS; i>10 ; i--)
   {
-    pixels.setBrightness(i);
-    pixels.show();
+    ledRing.setBrightness(i);
+    ledRing.show();
+
+    // --- WS2812 Center LEDS
+    #ifndef USE_BASIC_LEDS
+      centerLeds.setBrightness(i);
+      centerLeds.show();
+    #endif
+
     delay(7);
   }
   // Display normal brightness again
-  ledRingNormalLight();
+  ledNormalLight();
 }
 
