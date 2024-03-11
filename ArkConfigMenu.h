@@ -11,7 +11,7 @@
 #include "TimezoneDef.h"
 
 
-#define ARK_CONFIG_VERSION 1
+#define ARK_CONFIG_VERSION 2
 
 // Root menu
 #define ROOT_MENU_SIZE 3
@@ -51,18 +51,25 @@
 // Identifiers for preferences. Max 15 chars
 #define CONFIG_NAMESPACE "ArkConfig"
 #define CONFIG_OPTION__CONFIG_VERSION "configVersion"
+#define CONFIG_OPTION__WIFI__TYPE "wifiType"
 #define CONFIG_OPTION__WIFI__SSID "wifiSSID"
 #define CONFIG_OPTION__WIFI__PASSWORD "wifiPassword"
+#define CONFIG_OPTION__WIFI__USERNAME "wifiUser" // needed for "Enterprise" wifi
 #define CONFIG_OPTION__TIME__TIMEZONE "timeZone"
 #define CONFIG_OPTION__FONT__BLINKING_COLON "fontBlkColon"
 #define CONFIG_OPTION__FONT__NO "fontNo"
+
+#define WIFI_TYPE__HOME 0
+#define WIFI_TYPE__ENTERPRISE 1
 
 
 // To store Wifi Configuration
 struct ArkWifiConfig
 {
+  short type; 
   char ssid[30];
-  char password[30];
+  char password[50];
+  char username[50];
 };
 
 // To store time configuration
@@ -100,8 +107,11 @@ class ArkConfigMenu
 
     bool isConfigFormatValid();
 
+    short getWifiType();
     char* getWifiSSID();
+    char* getWifiUsername();
     char* getWifiPassword();
+    
     TimezoneInfos getTimezoneInfos();
     FontInfos getFontInfos();
     bool doesColonHaveToBlink();

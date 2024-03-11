@@ -172,7 +172,9 @@ void ArkConfigMenu::printNextInputPrompt()
 
 // ------------------------------------------------------------
 // Returns Configuration information
+short ArkConfigMenu::getWifiType() { return _config.wifi.type; }
 char* ArkConfigMenu::getWifiSSID() { return _config.wifi.ssid; }
+char* ArkConfigMenu::getWifiUsername() { return _config.wifi.username; }
 char* ArkConfigMenu::getWifiPassword() { return _config.wifi.password; }
 TimezoneInfos ArkConfigMenu::getTimezoneInfos() { return _timezoneList[_config.time.timezone]; }
 FontInfos ArkConfigMenu::getFontInfos() { return _fontList[_config.font.fontNo]; }
@@ -512,8 +514,10 @@ void ArkConfigMenu::loadConfig()
   prefs.begin(CONFIG_NAMESPACE, true);
   _config.version = prefs.getShort(CONFIG_OPTION__CONFIG_VERSION, INT_UNINITIALIZED);
   // Wifi
+  _config.wifi.type = prefs.getShort(CONFIG_OPTION__WIFI__TYPE, INT_UNINITIALIZED);
   convertStringToCharArray(prefs.getString(CONFIG_OPTION__WIFI__SSID, STRING_UNINITIALIZED), _config.wifi.ssid);
   convertStringToCharArray(prefs.getString(CONFIG_OPTION__WIFI__PASSWORD, STRING_UNINITIALIZED), _config.wifi.password);
+  convertStringToCharArray(prefs.getString(CONFIG_OPTION__WIFI__USERNAME, STRING_UNINITIALIZED), _config.wifi.username);
   
   // Time
   _config.time.timezone = prefs.getShort(CONFIG_OPTION__TIME__TIMEZONE);
@@ -521,7 +525,7 @@ void ArkConfigMenu::loadConfig()
   // Font
   _config.font.colonBlink = prefs.getBool(CONFIG_OPTION__FONT__BLINKING_COLON);
   _config.font.fontNo = prefs.getShort(CONFIG_OPTION__FONT__NO);
-  prefs.end();
+  
 
   _configFormatIsValid = true;
   // If equals to 0, it means that we don't have information about that
@@ -533,9 +537,12 @@ void ArkConfigMenu::loadConfig()
   // If stored configuration version is different than the current one
   if(_config.version != ARK_CONFIG_VERSION)
   {
-    // TODO: handle in the future
     _configFormatIsValid = false;
+    // Delete current preferences
+    prefs.clear();    
   }
+
+  prefs.end();
 }
 
 
@@ -548,8 +555,10 @@ void ArkConfigMenu::saveConfig()
 
   prefs.putShort(CONFIG_OPTION__CONFIG_VERSION, ARK_CONFIG_VERSION);
   // Wifi
+  prefs.putShort(CONFIG_OPTION__WIFI__TYPE, _config.wifi.type);
   prefs.putString(CONFIG_OPTION__WIFI__SSID, _config.wifi.ssid);
   prefs.putString(CONFIG_OPTION__WIFI__PASSWORD, _config.wifi.password);
+  prefs.putString(CONFIG_OPTION__WIFI__USERNAME, _config.wifi.username);
   // Time
   prefs.putShort(CONFIG_OPTION__TIME__TIMEZONE, _config.time.timezone);
   // Font
