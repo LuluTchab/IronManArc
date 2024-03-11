@@ -4,12 +4,11 @@
 #include <SPI.h>
 #include <Wire.h>
 #include <Adafruit_GFX.h>
-// https://github.com/adafruit/Adafruit_SSD1306
-#include <Adafruit_SSD1306.h>
-#include "Adafruit_NeoPixel.h"
+#include <Adafruit_SSD1306.h> // https://github.com/adafruit/Adafruit_SSD1306
+#include "Adafruit_NeoPixel.h" // https://github.com/adafruit/Adafruit_NeoPixel
 #include "StartupLogo.h"
-#include "NTPClient.h"
-#include "WiFiManager.h"
+#include "NTPClient.h" // https://github.com/arduino-libraries/NTPClient
+#include "WiFiManager.h" // https://github.com/tzapu/WiFiManager
 
 // Ark Configuration
 #include "ArkConfigMenu.h"
@@ -38,7 +37,6 @@ Adafruit_NeoPixel pixels(NB_LEDS, LED_PIN, NEO_GRB + NEO_KHZ800);
 
 // Define NTP Client to get time
 WiFiUDP ntpUDP;
-// https://github.com/arduino-libraries/NTPClient
 NTPClient timeClient(ntpUDP, "pool.ntp.org");
 
 // ==============================================================================
