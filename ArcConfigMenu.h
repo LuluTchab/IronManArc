@@ -1,5 +1,5 @@
-#ifndef ArkConfigMenu_h
-#define ArkConfigMenu_h
+#ifndef ArcConfigMenu_h
+#define ArcConfigMenu_h
 
 // https://iotcircuithub.com/esp32-preferences-library-tutorial/
 #include <Preferences.h>
@@ -11,7 +11,7 @@
 #include "TimezoneDef.h"
 
 
-#define ARK_CONFIG_VERSION 2
+#define ARC_CONFIG_VERSION 2
 
 // Root menu
 #define ROOT_MENU_SIZE 3
@@ -49,7 +49,7 @@
 #define EXPECTED_INPUT_TYPE_PROMPT__BOOL '&'
 
 // Identifiers for preferences. Max 15 chars
-#define CONFIG_NAMESPACE "ArkConfig"
+#define CONFIG_NAMESPACE "ArcConfig"
 #define CONFIG_OPTION__CONFIG_VERSION "configVersion"
 #define CONFIG_OPTION__WIFI__TYPE "wifiType"
 #define CONFIG_OPTION__WIFI__SSID "wifiSSID"
@@ -65,7 +65,7 @@
 
 
 // To store Wifi Configuration
-struct ArkWifiConfig
+struct ArcWifiConfig
 {
   short type; 
   char ssid[30];
@@ -74,33 +74,33 @@ struct ArkWifiConfig
 };
 
 // To store time configuration
-struct ArkTimeConfig
+struct ArcTimeConfig
 {
     short timezone;
 };
 
 // To store Font configuration
-struct ArkFontConfig
+struct ArcFontConfig
 {
   bool colonBlink;
   short fontNo;
 };
 
-// Structure to store whole ARK Clock configuration
-struct ArkConfig 
+// Structure to store whole Arc Clock configuration
+struct ArcConfig 
 {
   short version;
-  ArkWifiConfig wifi;
-  ArkTimeConfig time;
-  ArkFontConfig font;
+  ArcWifiConfig wifi;
+  ArcTimeConfig time;
+  ArcFontConfig font;
 };
 
 // ---------------------------------------
 // Class definition
-class ArkConfigMenu
+class ArcConfigMenu
 {
   public:
-    ArkConfigMenu();
+    ArcConfigMenu();
 
     void begin(WiFiClass wifiAdapter, FontInfos fontList[], TimezoneInfos timezoneList[]);
 
@@ -129,7 +129,7 @@ class ArkConfigMenu
     WiFiClass _wifiAdapter;
 
     // To store configuration
-    ArkConfig _config;
+    ArcConfig _config;
 
     String _nextInputPrompt;
     char _nextExpectedInputTypePrompt;

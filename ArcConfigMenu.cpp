@@ -1,8 +1,8 @@
-#include "ArkConfigMenu.h"
+#include "ArcConfigMenu.h"
 
 
 // Class constructor
-ArkConfigMenu::ArkConfigMenu()
+ArcConfigMenu::ArcConfigMenu()
 {
   // Set as "no menu selected"
   _currentMenuIndex = INT_UNINITIALIZED;
@@ -38,7 +38,7 @@ ArkConfigMenu::ArkConfigMenu()
 // Start the configuration
 // NOTE: we cannot do this inside class constructor because it won't be
 // able to correcly load configuration from Preferences
-void ArkConfigMenu::begin(WiFiClass wifiAdapter, FontInfos fontList[], TimezoneInfos timezoneList[])
+void ArcConfigMenu::begin(WiFiClass wifiAdapter, FontInfos fontList[], TimezoneInfos timezoneList[])
 {
   Serial.begin(115200);
   while (!Serial) {
@@ -64,12 +64,12 @@ void ArkConfigMenu::begin(WiFiClass wifiAdapter, FontInfos fontList[], TimezoneI
 
 // ------------------------------------------------------------
 // To tell if configuration format is valid
-bool ArkConfigMenu::isConfigFormatValid() { return _configFormatIsValid; }
+bool ArcConfigMenu::isConfigFormatValid() { return _configFormatIsValid; }
 
 
 // ------------------------------------------------------------
 // Handle menu inputs
-short ArkConfigMenu::handleInput()
+short ArcConfigMenu::handleInput()
 {
   // Id of action to return to caller, in case of something has to be handled on caller side
   short actionToReturn = INT_UNINITIALIZED;
@@ -152,7 +152,7 @@ short ArkConfigMenu::handleInput()
 
 // ------------------------------------------------------------
 // Set next input prompt text and expected type
-void ArkConfigMenu::setNextInputPrompt(String txt, char type)
+void ArcConfigMenu::setNextInputPrompt(String txt, char type)
 {
   _nextInputPrompt = txt;
   _nextExpectedInputTypePrompt = type;
@@ -163,7 +163,7 @@ void ArkConfigMenu::setNextInputPrompt(String txt, char type)
 
 // ------------------------------------------------------------
 // Displays next user input prompt, with char to identify type
-void ArkConfigMenu::printNextInputPrompt()
+void ArcConfigMenu::printNextInputPrompt()
 {
   Serial.print(_nextInputPrompt);
   Serial.println(_nextExpectedInputTypePrompt);
@@ -172,18 +172,18 @@ void ArkConfigMenu::printNextInputPrompt()
 
 // ------------------------------------------------------------
 // Returns Configuration information
-short ArkConfigMenu::getWifiType() { return _config.wifi.type; }
-char* ArkConfigMenu::getWifiSSID() { return _config.wifi.ssid; }
-char* ArkConfigMenu::getWifiUsername() { return _config.wifi.username; }
-char* ArkConfigMenu::getWifiPassword() { return _config.wifi.password; }
-TimezoneInfos ArkConfigMenu::getTimezoneInfos() { return _timezoneList[_config.time.timezone]; }
-FontInfos ArkConfigMenu::getFontInfos() { return _fontList[_config.font.fontNo]; }
-bool ArkConfigMenu::doesColonHaveToBlink() { return _config.font.colonBlink; }
+short ArcConfigMenu::getWifiType() { return _config.wifi.type; }
+char* ArcConfigMenu::getWifiSSID() { return _config.wifi.ssid; }
+char* ArcConfigMenu::getWifiUsername() { return _config.wifi.username; }
+char* ArcConfigMenu::getWifiPassword() { return _config.wifi.password; }
+TimezoneInfos ArcConfigMenu::getTimezoneInfos() { return _timezoneList[_config.time.timezone]; }
+FontInfos ArcConfigMenu::getFontInfos() { return _fontList[_config.font.fontNo]; }
+bool ArcConfigMenu::doesColonHaveToBlink() { return _config.font.colonBlink; }
 
 
 // ------------------------------------------------------------
 // Converts String into char*
-void ArkConfigMenu::convertStringToCharArray(String text, char* output)
+void ArcConfigMenu::convertStringToCharArray(String text, char* output)
 {
   text.toCharArray(output, text.length()+1);
 }
@@ -191,7 +191,7 @@ void ArkConfigMenu::convertStringToCharArray(String text, char* output)
 
 // ------------------------------------------------------------
 // Display menu for user
-void ArkConfigMenu::printCurrentMenu()
+void ArcConfigMenu::printCurrentMenu()
 {
   // If we have to display Root menu
   if(_currentMenuIndex == INT_UNINITIALIZED)
@@ -225,7 +225,7 @@ void ArkConfigMenu::printCurrentMenu()
 
 // ------------------------------------------------------------
 // Handle sub-menu selection
-short ArkConfigMenu::handleSubMenu(String lastUserInput)
+short ArcConfigMenu::handleSubMenu(String lastUserInput)
 {
   // Id of action to return to caller, in case of something has to be handled on caller side
   short actionToReturn = INT_UNINITIALIZED;
@@ -337,7 +337,7 @@ short ArkConfigMenu::handleSubMenu(String lastUserInput)
           // Saving configuration into EEPROM
           saveConfig();
           Serial.println("");
-          Serial.println("Wifi updated. Ark reactor will restart in 2 seconds...");
+          Serial.println("Wifi updated. Arc reactor will restart in 2 seconds...");
           delay(2000);
           ESP.restart();
           // To display sub-menu again
@@ -489,7 +489,7 @@ short ArkConfigMenu::handleSubMenu(String lastUserInput)
 
 
 // ------------------------------------------------------------
-void ArkConfigMenu::printInvalidConfigMessage()
+void ArcConfigMenu::printInvalidConfigMessage()
 {
   Serial.println("!! Configuration is invalid, please update it !!");
 }
@@ -499,7 +499,7 @@ void ArkConfigMenu::printInvalidConfigMessage()
 // Returns array index in which menu with ID menuIndex is located
 // rootMenuIndex can be ROOT_MENU_INDEX__WIFI_CONFIG or ROOT_MENU_INDEX__FONT_CONFIG
 // subMenuId can be value of SUB_MENU__*, except SUB_MENU__BACK
-short ArkConfigMenu::getSubMenuIndexFromId(short rootMenuIndex, short subMenuId)
+short ArcConfigMenu::getSubMenuIndexFromId(short rootMenuIndex, short subMenuId)
 {
   return subMenuId - (rootMenuIndex*10);
 }
@@ -508,7 +508,7 @@ short ArkConfigMenu::getSubMenuIndexFromId(short rootMenuIndex, short subMenuId)
 // Returns menu ID (value of SUB_MENU__*, except SUB_MENU__BACK) for given menu index
 // rootMenuIndex can be ROOT_MENU_INDEX__WIFI_CONFIG or ROOT_MENU_INDEX__FONT_CONFIG
 // subMenuIndex, from 0 to  <ROOT_MENU_SIZE
-short ArkConfigMenu::getSubMenuIdFromIndex(short rootMenuIndex, short subMenuIndex)
+short ArcConfigMenu::getSubMenuIdFromIndex(short rootMenuIndex, short subMenuIndex)
 {
   return subMenuIndex + (rootMenuIndex*10);
 }
@@ -516,7 +516,7 @@ short ArkConfigMenu::getSubMenuIdFromIndex(short rootMenuIndex, short subMenuInd
 
 // ------------------------------------------------------------
 // Returns current submenu size
-short ArkConfigMenu::getCurrentSubMenuSize()
+short ArcConfigMenu::getCurrentSubMenuSize()
 {
   switch(_currentMenuIndex)
   {
@@ -529,7 +529,7 @@ short ArkConfigMenu::getCurrentSubMenuSize()
 
 // ------------------------------------------------------------
 // Toggle font
-void ArkConfigMenu::toggleFont()
+void ArcConfigMenu::toggleFont()
 {
   _config.font.fontNo = (_config.font.fontNo+1) % NB_FONTS;
   saveConfig();
@@ -538,7 +538,7 @@ void ArkConfigMenu::toggleFont()
 
 // ------------------------------------------------------------
 // Load configuration from Preferences
-void ArkConfigMenu::loadConfig()
+void ArcConfigMenu::loadConfig()
 {
   Preferences prefs;
   String tmp;
@@ -566,7 +566,7 @@ void ArkConfigMenu::loadConfig()
   }
 
   // If stored configuration version is different than the current one
-  if(_config.version != ARK_CONFIG_VERSION)
+  if(_config.version != ARC_CONFIG_VERSION)
   {
     _configFormatIsValid = false;
     // Delete current preferences
@@ -579,12 +579,12 @@ void ArkConfigMenu::loadConfig()
 
 // ------------------------------------------------------------
 // Saves configuration into Preferences
-void ArkConfigMenu::saveConfig()
+void ArcConfigMenu::saveConfig()
 {
   Preferences prefs;
   prefs.begin(CONFIG_NAMESPACE, false);
 
-  prefs.putShort(CONFIG_OPTION__CONFIG_VERSION, ARK_CONFIG_VERSION);
+  prefs.putShort(CONFIG_OPTION__CONFIG_VERSION, ARC_CONFIG_VERSION);
   // Wifi
   prefs.putShort(CONFIG_OPTION__WIFI__TYPE, _config.wifi.type);
   prefs.putString(CONFIG_OPTION__WIFI__SSID, _config.wifi.ssid);

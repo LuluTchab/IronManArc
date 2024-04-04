@@ -1,4 +1,4 @@
-# IronManArk
+# IronManArc
 
 ## Prerequisite
 
@@ -12,7 +12,7 @@
 - esp32 (Espressif Systems)
 
 ## Compile options
-You can comment/uncomment following line in `IronManArk.ino` to specify if your Ark reactor uses standard or WS2812 LEDs for middle part.
+You can comment/uncomment following line in `IronManArc.ino` to specify if your Arc reactor uses standard or WS2812 LEDs for middle part.
 ```cpp
 #define USE_BASIC_LEDS
 ```

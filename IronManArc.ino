@@ -11,13 +11,13 @@
 #include <WiFi.h>
 #include "esp_wpa2.h" //wpa2 library for connections to Enterprise networks
 
-// Ark Configuration
-#include "ArkConfigMenu.h"
+// Arc Configuration
+#include "ArcConfigMenu.h"
 
 //////////////////////
 
 // Comment following line if you want to use enhanced version with WS2812 RGB LEDS
-// for Ark middle light
+// for Arc middle light
 //#define USE_BASIC_LEDS
 
 //////////////////////
@@ -90,7 +90,7 @@ bool newHourFlashDone;
 bool togglingFont;
 
 // Configuration menu
-ArkConfigMenu configMenu;
+ArcConfigMenu configMenu;
 
 void setup()
 {

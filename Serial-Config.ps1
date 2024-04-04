@@ -44,7 +44,7 @@ $portObj = new-Object System.IO.Ports.SerialPort ("COM{0}" -f $portNo),115200,No
 $portObj.Close()
 $portObj.open()
 
-# Sending request for menu to Ark reactor
+# Sending request for menu to Arc reactor
 $portObj.WriteLine("?")
 Start-Sleep -Milliseconds 50
 
@@ -57,20 +57,20 @@ do
 while($line -notmatch '^Choice')
 
 
-# Sending request for menu to Ark reactor
+# Sending request for menu to Arc reactor
 $portObj.WriteLine("?")
 Start-Sleep -Milliseconds 50
 
 while($true)
 {
-    # Reading next line sent by Ark Reactor and remove 'new lines' characters
+    # Reading next line sent by Arc Reactor and remove 'new lines' characters
     $line = $portObj.ReadLine() -replace "`n","" -replace "`r",""
 
     # If line matches an input pattern
     if($line -match $INPUT_PATTERN_MATCH)
     {
         Write-Host "" # Just a new line
-        # Removing prompt type from string sent from Ark Reactor
+        # Removing prompt type from string sent from Arc Reactor
         $prompt = $line -replace $INPUT_PATTERN_MATCH,""
         if($prompt -eq "")
         {
@@ -113,7 +113,7 @@ while($true)
                         Throw "'y' or 'n' expected"
                     }
 
-                    # If we arrive here, it means everything is OK to send user input back to Ark Reactor
+                    # If we arrive here, it means everything is OK to send user input back to Arc Reactor
                     $portObj.WriteLine($cmd)
                     Start-Sleep -Milliseconds 50
                 }
