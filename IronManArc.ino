@@ -117,7 +117,7 @@ void setup()
   // If configuration is not valid
   if (!configMenu.isConfigFormatValid()) 
   {
-    displayTextOnOLED("Invalid config\nUse Serial port\nhttps://t.ly/sFklh");
+    displayTextOnOLED("Invalid config\nUse Serial port\nhttps://t.ly/HvUdV");
   }
   else  // Configuration is valid
   {
@@ -184,7 +184,7 @@ void setup()
     }
     else
     {
-      displayTextOnOLED("Wifi connect error\nUse Serial port\nhttps://t.ly/sFklh");
+      displayTextOnOLED("Wifi connect error\nUse Serial port\nhttps://t.ly/HvUdV");
     }
 
   }
