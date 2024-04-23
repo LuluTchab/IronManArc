@@ -76,6 +76,8 @@ NTPClient timeClient(ntpUDP, "pool.ntp.org");
 #define SCREEN_ADDRESS 0x3C  ///< See datasheet for Address; 0x3D for 128x64, 0x3C for 128x32
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
+#define LOOP_DELAY_MS 200
+#define CHANGE_FONT_TOUCH_TIME_MS 600
 
 #define LOGO_HEIGHT 32
 #define LOGO_WIDTH 128
@@ -85,6 +87,7 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 #define COLON_WIDTH 12
 
 int previousSeconds;
+int touchDuration;
 bool colonDisplayed;
 bool newHourFlashDone;
 bool togglingFont;
@@ -117,6 +120,7 @@ void setup()
   // Init
   colonDisplayed = true;
   newHourFlashDone = false;
+  touchDuration = 0;
 
   // Init configuration menu
   configMenu.begin(WiFi, allFonts, timezoneList);
@@ -234,15 +238,26 @@ void loop()
     // If toggle font has been requested and we're not currently toggling font..
     if(digitalRead(TOUCH_SENSOR_PIN)==HIGH && !togglingFont)
     {
-      togglingFont = true;
-      configMenu.toggleFont();
+      // If touch sensor is touched for CHANGE_FONT_TOUCH_TIME_MS time
+      if(touchDuration >= CHANGE_FONT_TOUCH_TIME_MS)
+      {
+        togglingFont = true;
+        configMenu.toggleFont();
+        touchDuration = 0;
+      }
+      else // Not touch long enough
+      {
+        touchDuration += LOOP_DELAY_MS;
+      }
     }
+    // toggle font touch sensor has been released
     if(digitalRead(TOUCH_SENSOR_PIN)==LOW)
     {
       togglingFont = false;
+      touchDuration = 0;
     }
 
-    delay(200);
+    delay(LOOP_DELAY_MS);
   }
 
 }
