@@ -96,6 +96,24 @@ void setup()
 {
   Serial.begin(115200);
 
+  // INITIALIZE NeoPixel pixels object and power off LEDs
+  ledRing.begin(); 
+  ledRing.clear();
+  ledRing.show();
+
+  // --- BASIC LEDS
+  #ifdef USE_BASIC_LEDS
+    pinMode(BLUE_LED_1_PIN, OUTPUT);
+    pinMode(BLUE_LED_2_PIN, OUTPUT);
+    digitalWrite(BLUE_LED_1_PIN, LOW);
+    digitalWrite(BLUE_LED_2_PIN, LOW);
+  #else
+    // Init and power off center
+    centerLeds.begin();
+    centerLeds.clear();
+    centerLeds.show();
+  #endif
+
   // Init
   colonDisplayed = true;
   newHourFlashDone = false;
@@ -147,7 +165,7 @@ void setup()
     {
       timeClient.begin();
 
-      ledRing.begin(); // INITIALIZE NeoPixel pixels object
+      
       ledRing.setBrightness(LED_NORMAL_BRIGHTNESS);
 
       for(int i=0; i<LED_RING_NB_LEDS;i++)
@@ -162,15 +180,11 @@ void setup()
       // --- BASIC LEDS
       #ifdef USE_BASIC_LEDS
         // switch ON the blue leds
-        pinMode(BLUE_LED_1_PIN, OUTPUT);
         digitalWrite(BLUE_LED_1_PIN, HIGH);
-
-        pinMode(BLUE_LED_2_PIN, OUTPUT);
         digitalWrite(BLUE_LED_2_PIN, HIGH);
 
       #else  // --- WS2812
 
-        centerLeds.begin();
         for(int i=0; i<CENTER_LEDS_NB_LEDS;i++)
         {
           centerLeds.setPixelColor(i, centerLeds.Color(LED_RING_RED, LED_RING_GREEN, LED_RING_BLUE));
