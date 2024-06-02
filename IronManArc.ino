@@ -9,7 +9,7 @@
 #include "StartupLogo.h"
 #include "NTPClient.h" // https://github.com/arduino-libraries/NTPClient
 #include <WiFi.h>
-#include "esp_wpa2.h" //wpa2 library for connections to Enterprise networks
+//#include "esp_wpa2.h" //wpa2 library for connections to Enterprise networks
 
 // Arc Configuration
 #include "ArcConfigMenu.h"
@@ -123,7 +123,7 @@ void setup()
   touchDuration = 0;
 
   // Init configuration menu
-  configMenu.begin(WiFi, allFonts, timezoneList);
+  configMenu.begin(allFonts, timezoneList);
 
   // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
   if(!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) 
@@ -143,6 +143,8 @@ void setup()
   }
   else  // Configuration is valid
   {
+    WiFi.disconnect();
+
     if(configMenu.getWifiType() == WIFI_TYPE__HOME)
     {
       // Connection on Wifi network
@@ -206,13 +208,14 @@ void setup()
     }
 
   }
-
+  
 }
 
 void loop() 
 {
   bool isNewHour;
-  short actionToDo = configMenu.handleInput();
+  
+  short actionToDo = configMenu.handleInput(&WiFi);
 
   // If wifi is connected
   if(WiFi.status() == WL_CONNECTED) 

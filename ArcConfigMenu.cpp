@@ -38,7 +38,7 @@ ArcConfigMenu::ArcConfigMenu()
 // Start the configuration
 // NOTE: we cannot do this inside class constructor because it won't be
 // able to correcly load configuration from Preferences
-void ArcConfigMenu::begin(WiFiClass wifiAdapter, FontInfos fontList[], TimezoneInfos timezoneList[])
+void ArcConfigMenu::begin(FontInfos fontList[], TimezoneInfos timezoneList[])
 {
   Serial.begin(115200);
   while (!Serial) {
@@ -52,7 +52,6 @@ void ArcConfigMenu::begin(WiFiClass wifiAdapter, FontInfos fontList[], TimezoneI
   _nextInputPrompt = INPUT_PROMPT__CHOICE;
 
   // Saving parameters
-  _wifiAdapter = wifiAdapter;
   _fontList = fontList;
   _timezoneList = timezoneList;
 
@@ -69,7 +68,7 @@ bool ArcConfigMenu::isConfigFormatValid() { return _configFormatIsValid; }
 
 // ------------------------------------------------------------
 // Handle menu inputs
-short ArcConfigMenu::handleInput()
+short ArcConfigMenu::handleInput(WiFiClass* wifiAdapter)
 {
   // Id of action to return to caller, in case of something has to be handled on caller side
   short actionToReturn = INT_UNINITIALIZED;
@@ -124,7 +123,7 @@ short ArcConfigMenu::handleInput()
               else // Another menu entry was selected
               {
                 _currentSubMenuIndex = requestedMenuIndex;
-                actionToReturn = handleSubMenu(userInput);
+                actionToReturn = handleSubMenu(userInput, wifiAdapter);
               }
               
             }
@@ -137,7 +136,7 @@ short ArcConfigMenu::handleInput()
         }// END if we are navigating into menus        
         else // We've selected an entry in sub-menu
         {
-          actionToReturn = handleSubMenu(userInput);
+          actionToReturn = handleSubMenu(userInput, wifiAdapter);
         }
       }// END if help wasn't requested
       
@@ -225,7 +224,7 @@ void ArcConfigMenu::printCurrentMenu()
 
 // ------------------------------------------------------------
 // Handle sub-menu selection
-short ArcConfigMenu::handleSubMenu(String lastUserInput)
+short ArcConfigMenu::handleSubMenu(String lastUserInput, WiFiClass* wifiAdapter)
 {
   // Id of action to return to caller, in case of something has to be handled on caller side
   short actionToReturn = INT_UNINITIALIZED;
@@ -260,7 +259,7 @@ short ArcConfigMenu::handleSubMenu(String lastUserInput)
     case SUB_MENU__WIFI_CONFIG__LIST_NETWORKS:
     {
       Serial.println("Scanning networks...");
-      int numSsid = _wifiAdapter.scanNetworks();
+      int numSsid = wifiAdapter->scanNetworks();
 
       String ssid;
       uint8_t encryptionType;
@@ -271,7 +270,7 @@ short ArcConfigMenu::handleSubMenu(String lastUserInput)
       Serial.printf("%d network(s) found\n", numSsid);
       for (int i = 0; i < numSsid; i++) 
       {
-        _wifiAdapter.getNetworkInfo(i, ssid, encryptionType, RSSI, BSSID, channel);
+        wifiAdapter->getNetworkInfo(i, ssid, encryptionType, RSSI, BSSID, channel);
         Serial.printf("%d: %s - Channel:%d (%ddBm)\n", i + 1, ssid.c_str(), channel, RSSI);
       }
       // To display sub-menu again

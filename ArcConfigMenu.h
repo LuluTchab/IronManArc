@@ -102,9 +102,9 @@ class ArcConfigMenu
   public:
     ArcConfigMenu();
 
-    void begin(WiFiClass wifiAdapter, FontInfos fontList[], TimezoneInfos timezoneList[]);
+    void begin(FontInfos fontList[], TimezoneInfos timezoneList[]);
 
-    short handleInput();
+    short handleInput(WiFiClass* wifiAdapter);
 
     bool isConfigFormatValid();
 
@@ -126,7 +126,6 @@ class ArcConfigMenu
     bool _configFormatIsValid;
     FontInfos* _fontList;
     TimezoneInfos* _timezoneList;
-    WiFiClass _wifiAdapter;
 
     // To store configuration
     ArcConfig _config;
@@ -143,7 +142,7 @@ class ArcConfigMenu
     void printCurrentMenu();
     void setNextInputPrompt(String txt, char type=EXPECTED_INPUT_TYPE_PROMPT__STRING);
     void printNextInputPrompt();
-    short handleSubMenu(String lastUserInput);
+    short handleSubMenu(String lastUserInput, WiFiClass* wifiAdapter);
     void printInvalidConfigMessage();
 
     short getSubMenuIndexFromId(short rootMenuIndex, short subMenuId);
