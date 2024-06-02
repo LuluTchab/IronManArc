@@ -130,7 +130,7 @@ while($true)
     else # Line doesn't matches an input patern, 
     {
         # Just displaying it
-        Write-host $line -ForegroundColor:DarkBlue        
+        Write-host $line -ForegroundColor:Cyan        
     }
 }
 
