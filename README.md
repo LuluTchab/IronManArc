@@ -9,7 +9,7 @@
 - NTPClient
 
 ### Needed Board Manager
-- esp32 (Espressif Systems)
+- esp32 (Espressif Systems) **version 2.0.17**
 
 ## Compile options
 You can comment/uncomment following line in `IronManArc.ino` to specify if your Arc reactor uses standard or WS2812 LEDs for middle part.
@@ -20,7 +20,8 @@ You can comment/uncomment following line in `IronManArc.ino` to specify if your 
 ## Compile/Upload
 
 1. Select board **WEMOS D1 MINI ESP32**
-2. 
+2. Select right port
+3. Click on the arrow to compile and upload
 
 
 Convert image to CPP: https://diyusthad.com/image2cpp
