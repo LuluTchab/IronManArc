@@ -306,7 +306,7 @@ short ArcConfigMenu::handleSubMenu(String lastUserInput, WiFiClass* wifiAdapter)
           // If we have to ask for username
           if(getWifiType()==WIFI_TYPE__ENTERPRISE)
           {
-            setNextInputPrompt("Enter Wifi Username (user@domain)", EXPECTED_INPUT_TYPE_PROMPT__PASSWORD);
+            setNextInputPrompt("Enter Wifi Username (user@domain)", EXPECTED_INPUT_TYPE_PROMPT__STRING);
             break;
           }
           else
