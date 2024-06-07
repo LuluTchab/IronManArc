@@ -167,8 +167,12 @@ void setup()
     }
 
     // If we were able to connect on Wifi138
-    if(nbMsLeftToTry > 0)
+    if(WiFi.status() == WL_CONNECTED)
     {
+      Serial.println("WiFi connected");
+      Serial.print("IP address set: ");
+      Serial.println(WiFi.localIP());  //print LAN IP
+      
       timeClient.begin();
 
       
